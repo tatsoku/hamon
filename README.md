@@ -6,11 +6,11 @@ A home-made shell in C.
 
 ## Installation
 
-Coming soon:tm:
+Coming soon :tm:
 
 ## Usage
 
-Coming soon:tm:
+Coming soon :tm:
 
 Made with :heart: by h4rl
 
