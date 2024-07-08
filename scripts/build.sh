@@ -76,6 +76,18 @@ if [[ ! -d ${OUT} ]]; then
 	mkdir "${OUT}"
 fi
 
+handle_failure() {
+	local MESSAGE="${1}"
+
+	if [[ -z ${MESSAGE} ]]; then
+		echo "No message provided, are you using this right?"
+		exit 1
+	fi
+
+	echo "${RED}!${CLEAR} ${MESSAGE}${CLEAR}"
+	exit 1
+}
+
 print_help() {
 	echo -e "${RED}${__NAME__}${CLEAR} v${GREEN}${__VERSION__}${CLEAR}"
 	echo -e "Licensed under: ${CYAN}${__LICENSE__}${CLEAR}\n"
@@ -114,22 +126,22 @@ compile() {
 			read -r RECOMPILE
 			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
 				if ${DEBUG}; then
-					gcc "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+					clang "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 				else
-					gcc -O3 "${CFLAGS}" -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+					clang -O3 "${CFLAGS}" -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 				fi
 			fi
 		else
 			if ${DEBUG}; then
-				gcc "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				clang "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			else
-				gcc -O3 ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				clang -O3 ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			fi
 		fi
 	done
 
 	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-	gcc -O3 "${CFLAGS}" -c "${SRC}/main.c" -o "${OUT}/main.o"
+	clang -O3 "${CFLAGS}" -c "${SRC}/main.c" -o "${OUT}/main.o"
 
 	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
 }
@@ -156,7 +168,7 @@ link() {
 	mapfile -t OBJECTS < <(find "${OUT}" -type f -name "*.o")
 
 	TRIMMED_FILES="${OBJECTS[*]##*/}"
-	pushd "${OUT}" >/dev/null #|| echo "Failed to pushd" && exit 1
+	pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
 	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
 
@@ -164,16 +176,16 @@ link() {
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
-			gcc ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+			clang -fuse-ld=mold ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
 		fi
 	else
-		gcc ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+		clang -fuse-ld=mold ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
 
 	fi
 
-	popd >/dev/null # || echo "Failed to popd" && exit 1
+	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 }
 # removes dangling object files that shouldn't be there, used to be required, not that much as of lately though.
 

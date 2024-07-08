@@ -1,6 +1,5 @@
 #include "headers/prompt.h"
 #include "headers/config.h"
-#include <unistd.h>
 
 char *get_hostname() {
   char *hostname = 0;
@@ -50,14 +49,23 @@ char *get_username() {
   return username;
 }
 
+enum PromptType get_prompt_type() { return Default; }
+
 char *assemble_prompt(enum PromptType prompt_type) {
   switch (prompt_type) {
   case Default:
-    printf("todo");
+    puts("todo");
+    break;
   case Custom:
-    printf("todo");
+    puts("todo");
+    break;
   default:
     return 0;
   }
+  return 0;
+}
+
+int init_prompt() {
+  char *prompt = assemble_prompt(Default);
   return 0;
 }

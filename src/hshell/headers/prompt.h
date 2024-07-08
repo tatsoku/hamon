@@ -2,6 +2,7 @@
 #define PROMPT_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -20,6 +21,6 @@ enum PromptType{
 
 char *get_hostname();
 char *get_username();
-
+int init_prompt();
 
 #endif // !PROMPT_H
