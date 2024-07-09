@@ -15,9 +15,9 @@ Compiled with [clang](https://github.com/llvm/llvm-project/tree/main/clang) & li
 ## Installation
 
 > Classic installation through package manager and such, won't be available for a very long time.
-
+>
 > So you will have to build it yourself.
-
+>
 > Oh you want to know how?
 
 ### With Just
