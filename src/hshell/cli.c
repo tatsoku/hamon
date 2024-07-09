@@ -54,7 +54,7 @@ int info_for_flag(Info *info) {
     printf(CLEAR " | %s%s" CLEAR, flags_esc, flags[flag_row]);
   }
   printf("\n%s%s\n" CLEAR, info->info_esc, info->info);
-  printf("USAGE: %s%s\n\n", info->use_esc, buffer);
+  printf("USAGE: %s%s\n\n" CLEAR, info->use_esc, buffer);
   free(buffer);
   return 0;
 }
@@ -141,8 +141,8 @@ int process_args(char *argv[]) {
   const char *infos[] = {"Prints this message.", "Shows program version.",
                          "Load a config file from other path than default"};
   const char *uses[] = {
-      "%s --help | %s -h", "%s --version | %s -v",
-      "%s --config {config file path} | %s -c {config file path}"};
+      "%s --help\n       %s -h", "%s --version\n       %s -v",
+      "%s --config {config file path}\n       %s -c {config file path}"};
 
   int flagsc = sizeof(flags) / sizeof(flags[0]);
   int infosc = sizeof(infos) / sizeof(infos[0]);
