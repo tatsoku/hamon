@@ -1,10 +1,13 @@
-# hShell
+# hamon!
 
-> Pronounced: _/ɧɛlː/_
+or <abbr title="Hamon Shell">hsh</abbr>
+
+<sub> 波紋 - Ripple </sub>
+
 
 A homemade shell in C.
 
-Compiled with [clang](https://github.com/llvm/llvm-project/tree/main/clang) & linked with [mold](https://github.com/rui314/mold).
+Compiled with [clang](https://github.com/llvm/llvm-project/tree/main/clang) or [gcc](https://gcc.gnu.org) & linked with [mold](https://github.com/rui314/mold).
 
 ![[LICENSE](https://github.com/h4rldev/hshell/blob/main/LICENSE)](https://img.shields.io/github/license/h4rldev/hshell?style=flat-square)
 ![[OpenSSF Scorecard](https://securityscorecards.dev/viewer/?uri=github.com/h4rldev/hshell)](https://api.securityscorecards.dev/projects/github.com/h4rldev/hshell/badge?style=flat-square)
