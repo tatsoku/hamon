@@ -15,13 +15,13 @@ char *assemble(char *codes[], int codesc) {
   snprintf(buffer, sizeof(BASE), BASE);
 
   for (int code_index = 0; code_index < codesc; code_index++) {
-    strncat(buffer, codes[code_index], sizeof(codes[code_index]));
+    strlcat(buffer, codes[code_index], sizeof(codes[code_index]));
     if (code_index != (codesc - 1)) {
-      strncat(buffer, ";", 1);
+      strlcat(buffer, ";", 1);
     }
   }
 
-  strncat(buffer, END, 1);
+  strlcat(buffer, END, 1);
   return buffer;
 }
 

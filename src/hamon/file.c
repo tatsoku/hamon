@@ -1,8 +1,7 @@
-#include <stdio.h>
 #define COLORS
 
-#include "headers/escape.h"
 #include "headers/file.h"
+#include "headers/escape.h"
 
 int write_file(const char *filename, const char *content, const size_t size) {
   FILE *file = fopen(filename, "w");

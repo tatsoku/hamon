@@ -130,7 +130,7 @@ int gen_default_config(void) {
     return 1;
   }
 
-  strncpy(config_buffer, default_config, config_buffer_size);
+  strlcpy(config_buffer, default_config, config_buffer_size);
 
 #if _WIN32
   env_size = strlen(getenv("APPDATA"));
