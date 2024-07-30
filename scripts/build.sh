@@ -39,7 +39,7 @@
 
 shopt -s nullglob
 
-__NAME__="hShell: build.sh"
+__NAME__="hamon!: build.sh"
 __AUTHOR__="h4rl"
 __DESCRIPTION__="Compiles & links hShell into a executable."
 __LICENSE__="BSD 3-Clause License"
@@ -48,9 +48,11 @@ __VERSION__="0.1.0"
 SRC="$(pwd)/src"
 OUT="$(pwd)/out"
 BIN="$(pwd)/bin"
-DIR="${SRC}/hshell"
+DIR="${SRC}/hamon"
 #INCLUDE="$(pwd)/include"
 COLOR=true
+
+CC="clang"
 
 if ${COLOR}; then
 	RED='\033[0;31m'
@@ -70,7 +72,7 @@ fi
 #CFLAGS=$(pkg-config --cflags gtk+-3.0)
 CFLAGS="-O3"
 #LINKER_FLAGS="$(pkg-config --libs gtk+-3.0) -lcurl -ljansson"
-#LINKER_FLAGS="-lcurl -ljansson"
+#LINKER_FLAGS=""
 
 if [[ ! -d ${OUT} ]]; then
 	mkdir "${OUT}"
@@ -126,22 +128,22 @@ compile() {
 			read -r RECOMPILE
 			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
 				if ${DEBUG}; then
-					clang "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+					"${CC}" ${CFLAGS} -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 				else
-					clang -O3 "${CFLAGS}" -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+					"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 				fi
 			fi
 		else
 			if ${DEBUG}; then
-				clang "${CFLAGS}" -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				"${CC}" ${CFLAGS} -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			else
-				clang -O3 ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			fi
 		fi
 	done
 
 	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
-	clang -O3 "${CFLAGS}" -c "${SRC}/main.c" -o "${OUT}/main.o"
+	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
 
 	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
 }
@@ -176,13 +178,12 @@ link() {
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
-			clang -fuse-ld=mold ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+			"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
 		fi
 	else
-		clang -fuse-ld=mold ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
-
 	fi
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1

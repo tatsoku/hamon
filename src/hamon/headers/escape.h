@@ -7,6 +7,7 @@
 // Colors like Red, Green, Blue, may extend more.
 #ifdef COLORS
 
+#define BLACK_CODE          "30"
 #define RED_CODE            "31"
 #define GREEN_CODE          "32"
 #define YELLOW_CODE         "33"
@@ -14,6 +15,7 @@
 #define MAGENTA_CODE        "35"
 #define CYAN_CODE           "36"
 
+#define BLACK               BASE BLACK_CODE END
 #define RED                 BASE RED_CODE END
 #define GREEN               BASE GREEN_CODE END
 #define YELLOW              BASE YELLOW_CODE END
