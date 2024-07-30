@@ -3,14 +3,14 @@
 
 char *get_hostname() {
   char *hostname = 0;
-#ifdef __linux__
+#if __linux__
   size_t hostname_len = 512;
   hostname = (char *)malloc(hostname_len + 1);
   if (gethostname(hostname, hostname_len) != 0) {
     free(hostname);
     return 0;
   }
-#elif _WIN32
+#elif defined(__GNUC__) && defined(WIN32)
   DWORD hostname_size = 0;
   if (!GetComputerName(NULL, &hostname_size)) {
     fprintf(stderr, "Failed to get hostname_size\n");
@@ -29,7 +29,7 @@ char *get_hostname() {
 
 char *get_username() {
   char *username = 0;
-#ifdef __linux__
+#if __linux__
   size_t username_len = 512;
   username = (char *)malloc(username_len + 1);
   if (getlogin_r(username, username_len) != 0) {
@@ -51,21 +51,9 @@ char *get_username() {
 
 enum PromptType get_prompt_type() { return Default; }
 
-char *assemble_prompt(enum PromptType prompt_type) {
-  switch (prompt_type) {
-  case Default:
-    puts("todo");
-    break;
-  case Custom:
-    puts("todo");
-    break;
-  default:
-    return 0;
-  }
-  return 0;
-}
+char *assemble_prompt() { return 0; }
 
 int init_prompt() {
-  char *prompt = assemble_prompt(Default);
+  char *prompt = assemble_prompt();
   return 0;
 }
