@@ -8,6 +8,8 @@ pkgs.mkShell {
     clang-tools
     clang
     mold
+    pre-commit
+    bash-language-server
   ];
   shellHook = ''
   '';
