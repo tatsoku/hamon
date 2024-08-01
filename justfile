@@ -28,8 +28,8 @@ default:
   just link {{name}}
   valgrind ./bin/{{name}} {{args}}
 
-@clear_cores args="":
-  scripts/clear_vgcores.sh {{args}}
+@clear_cores:
+  scripts/build.sh -vg
 
 @install name="hsh":
   just build {{name}}
