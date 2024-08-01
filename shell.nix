@@ -10,6 +10,7 @@ pkgs.mkShell {
     mold
     pre-commit
     bash-language-server
+    valgrind
   ];
   shellHook = ''
   '';

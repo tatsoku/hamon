@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# hShell: build.sh
+# hamon!: build.sh
 #
-# built with this inspirational message in mind: Why tf would I use make
+# built with this inspirational message in mind: Why tf would we use make
 #
 # Licensed under the:
 # BSD 3-Clause License
 #
-# Copyright (c) 2024, h4rl
+# Copyright (c) 2024, tatsoku
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,13 +35,13 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-# Made with <3 by h4rl.
+# Made with <3 by tatsoku-org!
 
 shopt -s nullglob
 
 __NAME__="hamon!: build.sh"
 __AUTHOR__="h4rl"
-__DESCRIPTION__="Compiles & links hShell into a executable."
+__DESCRIPTION__="Compiles & links hamon into an executable."
 __LICENSE__="BSD 3-Clause License"
 __VERSION__="0.1.0"
 
@@ -70,9 +70,7 @@ else
 	DEBUG=false
 fi
 
-#CFLAGS=$(pkg-config --cflags gtk+-3.0)
 CFLAGS="-O3"
-#LINKER_FLAGS="$(pkg-config --libs gtk+-3.0) -lcurl -ljansson"
 #LINKER_FLAGS=""
 
 if [[ ! -d ${OUT} ]]; then

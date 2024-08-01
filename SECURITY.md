@@ -13,6 +13,6 @@ So updates will be master for now.
 
 > __IF__ you do find a vulnerability.
 
-Make an issue [here!](https://github.com/h4rldev/hshell/issues)
+Make an issue [here!](https://github.com/tatsoku/hamon/issues)
 
 Thanks!

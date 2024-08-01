@@ -62,6 +62,23 @@
 
 #endif
 
+#ifdef CURSORS
+
+#define ENABLE              "l"
+#define DISABLE             "h"
+#define SET                 DISABLE
+
+#define HIDE_CURSOR         BASE "?25" DISABLE
+#define SHOW_CURSOR         BASE "?25" ENABLE
+#define CURSOR_NO_BLINK     BASE "?5" DISABLE
+#define CURSOR_BLINK        BASE "?5" ENABLE
+#define BLOCK_CURSOR        BASE "7" SET
+#define UNDERLINE_CURSOR    BASE "4" SET
+#define BLINK_BLOCK_CURSOR  BASE "5" SET
+#define VERTICAL_CURSOR     BASE "5 q"
+
+#endif
+
 // Global clear color/graphics mode string.
 #define CLEAR               "\033[0m"
 
