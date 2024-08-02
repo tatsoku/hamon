@@ -3,13 +3,9 @@ default:
 
 @fix_perms:
   chmod +x scripts/build.sh
-  chmod +x scripts/clear_vgcores.sh
 
-@compile-debug name="hsh":
-  scripts/build.sh -c {{name}} --debug
-
-@compile name="hsh":
-  scripts/build.sh -c {{name}}
+@compile extra_args="":
+  scripts/build.sh -c {{extra_args}}
 
 @link name="hsh":
   scripts/build.sh -l {{name}}
@@ -24,7 +20,7 @@ default:
   ./bin/{{name}} {{args}}
 
 @debug args="" name="hsh":
-  just compile-debug {{name}}
+  just compile --debug
   just link {{name}}
   valgrind ./bin/{{name}} {{args}}
 

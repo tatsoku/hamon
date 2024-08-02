@@ -9,6 +9,13 @@
 
 /*
  * Default configuration:
+ * ▄▄                                                ▄▄
+ * ██                                                ██
+ * ██▄████▄   ▄█████▄  ████▄██▄   ▄████▄   ██▄████▄  ██
+ * ██▀   ██   ▀ ▄▄▄██  ██ ██ ██  ██▀  ▀██  ██▀   ██  ██
+ * ██    ██  ▄██▀▀▀██  ██ ██ ██  ██    ██  ██    ██  ▀▀
+ * ██    ██  ██▄▄▄███  ██ ██ ██  ▀██▄▄██▀  ██    ██  ▄▄
+ * ▀▀    ▀▀   ▀▀▀▀ ▀▀  ▀▀ ▀▀ ▀▀    ▀▀▀▀    ▀▀    ▀▀  ▀▀
  *
  * # !! Main configuration for theming and prompt
  * # More advanced theming will happen at a way later date.
@@ -66,6 +73,13 @@
  */
 
 const char *default_config =
+    "# ▄▄                                                ▄▄\n"
+    "# ██                                                ██\n"
+    "# ██▄████▄   ▄█████▄  ████▄██▄   ▄████▄   ██▄████▄  ██\n"
+    "# ██▀   ██   ▀ ▄▄▄██  ██ ██ ██  ██▀  ▀██  ██▀   ██  ██\n"
+    "# ██    ██  ▄██▀▀▀██  ██ ██ ██  ██    ██  ██    ██  ▀▀\n"
+    "# ██    ██  ██▄▄▄███  ██ ██ ██  ▀██▄▄██▀  ██    ██  ▄▄\n"
+    "# ▀▀    ▀▀   ▀▀▀▀ ▀▀  ▀▀ ▀▀ ▀▀    ▀▀▀▀    ▀▀    ▀▀  ▀▀\n\n"
     "# !! Main configuration for theming and prompt\n"
     "# More advanced theming will happen at a way later date.\n\n"
     "[prompt]\n"

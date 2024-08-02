@@ -41,6 +41,6 @@ int main(int argc, char *argv[]) {
   gen_default_config();
 
   // init_shell();
-  // init_prompt();
+  init_prompt();
   return 0;
 }
