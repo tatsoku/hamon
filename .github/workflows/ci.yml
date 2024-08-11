@@ -1,0 +1,29 @@
+name: C Test CI
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install mold
+      uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0 # v1
+
+    - name: Install just
+      uses: extractions/setup-just@v1
+
+    - name: Test build
+      shell: bash
+      run: |
+        just build 
+
+    - name: Run unit-tests
+      shell: bash
+      run: |
+        just test

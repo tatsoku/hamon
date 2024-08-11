@@ -146,7 +146,7 @@ int gen_default_config(void) {
 
   strlcpy(config_buffer, default_config, config_buffer_size);
 
-#if _WIN32
+#ifdef _WIN32
   env_size = strlen(getenv("APPDATA"));
   folder_buffer_size = strlen("\\hamon\\") + env_size + 1;
   folder_buffer = (char *)malloc(folder_buffer_size);
@@ -157,6 +157,8 @@ int gen_default_config(void) {
   folder_buffer = (char *)malloc(folder_buffer_size);
   snprintf(folder_buffer, folder_buffer_size, "%s/.config/hamon/",
            getenv("HOME"));
+#else
+#error "Use a better operating system, loser"
 #endif
 
   if (!check_if_folder_exists(folder_buffer)) {

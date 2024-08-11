@@ -32,7 +32,7 @@ BOOL FindExecutableInPath(LPCSTR executable, LPCSTR *path_found) {
 
 int execute(char *executable, char **argv, int status) {
 
-#if __linux__
+#ifdef __linux__
   pid_t pid = fork();
 
   if (pid < 0) {
@@ -41,10 +41,11 @@ int execute(char *executable, char **argv, int status) {
     if (execvp(executable, argv) == -1) {
       if (errno == ENOENT) {
         fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
-      } else {
-        perror("Failed to exec to childprocess. (execvp)");
+        exit(1);
       }
-      return -1;
+
+      perror("Failed to exec to childprocess. (execvp)");
+      exit(1);
     }
   } else {
     wait(&status);
@@ -59,14 +60,17 @@ int execute(char *executable, char **argv, int status) {
     STARTUPINFO start_i;
     PROCESS_INFORMATION proc_i;
 
+    size_t full_path_size = strlen(path_found) + strlen(win_executable) + 2;
+
     ZeroMemory(&start_i, sizeof(start_i));
     start_i.cb = sizeof(start_i);
     ZeroMemory(&proc_i, sizeof(proc_i));
 
-    LPSTR full_path = malloc(strlen(path_found) + strlen(win_executable) + 2);
-    strlcpy(full_path, path_found, strlen(full_path));
-    strlcat(full_path, "\\", 2);
-    strlcat(full_path, win_executable, strlen(win_executable));
+    LPSTR full_path = malloc(full_path_size);
+    strlcpy(full_path, path_found, full_path_size + 1);
+    strlcat(full_path, "\\", full_path_size + 1);
+    strlcat(full_path, win_executable,
+            full_path_size + strlen(win_executable) + 1);
 
     if (!CreateProcess(0, full_path, 0, 0, FALSE, 0, 0, 0, &start_i, &proc_i)) {
       fprintf(stderr, RED "!%s CreateProcess failed (%d).\n", CLEAR,

@@ -1,4 +1,5 @@
 #define COLORS
+#define GRAPHICS
 
 #include "hamon/headers/cli.h"
 #include "hamon/headers/config.h"
@@ -38,9 +39,16 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     return process_args(argv);
   }
-  gen_default_config();
+  // gen_default_config();
 
   // init_shell();
-  init_prompt();
+  // init_prompt();
+  char *codes[2] = {CYAN_CODE, ITALIC_CODE};
+  char *assembled_escape = assemble(codes, 2);
+
+  printf("\n%sThis is what the escape looks like on your terminal! \n" CLEAR,
+         assembled_escape);
+
+  free(assembled_escape);
   return 0;
 }

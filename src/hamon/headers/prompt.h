@@ -1,23 +1,21 @@
 #ifndef PROMPT_H
 #define PROMPT_H
 
-#include <stdio.h>
 #include <stdbool.h>
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef __linux__
 #include <unistd.h>
+
 #elif _WIN32
 #include <windows.h>
+
 #else
 #error "Use a better operating system, loser"
-#endif
 
-enum PromptType{
-  Default,
-  Custom
-};
+#endif
 
 char *get_hostname();
 char *get_username();

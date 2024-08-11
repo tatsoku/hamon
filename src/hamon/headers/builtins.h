@@ -1,6 +1,7 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

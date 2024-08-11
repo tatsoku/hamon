@@ -7,7 +7,7 @@
 
 char *get_hostname() {
   char *hostname = 0;
-#if __linux__
+#ifdef __linux__
   size_t hostname_len = 512;
   hostname = (char *)malloc(hostname_len + 1);
   if (gethostname(hostname, hostname_len) != 0) {
@@ -27,13 +27,15 @@ char *get_hostname() {
     free(hostname);
     return 0;
   }
+#else
+#error "Use a better operating system, loser"
 #endif
   return hostname;
 }
 
 char *get_username() {
   char *username = 0;
-#if __linux__
+#ifdef __linux__
   size_t username_len = 512;
   username = (char *)malloc(username_len + 1);
   if (getlogin_r(username, username_len) != 0) {
@@ -49,11 +51,11 @@ char *get_username() {
     free(username);
     return 0;
   }
+#else
+#error "Use a better operating system, loser"
 #endif
   return username;
 }
-
-enum PromptType get_prompt_type() { return Default; }
 
 // char *assemble_prompt() { return ">"; }
 
@@ -72,7 +74,7 @@ void tokenize(char *input, char **tokens_buffer, char **save_ptr) {
 int init_prompt() {
   char *prompt = "hsh >";
   char input_buf[4096] = {0};
-  char *args[4096] = {0};
+  char *argv[4096] = {0};
   char *save_ptr = {0};
   int status = 0;
 
@@ -89,12 +91,14 @@ int init_prompt() {
       continue;
     }
 
-    tokenize(input_buf, args, &save_ptr);
+    tokenize(input_buf, argv, &save_ptr);
 
-    int argc = sizeof(args) / sizeof(args[0]);
+    int argc = sizeof(argv) / sizeof(argv[0]);
 
-    if (!check_builtins(argc, args)) {
-      execute(args[0], args, status);
+    if (!check_builtins(argc, argv)) {
+      if (execute(argv[0], argv, status) == -1) {
+        continue;
+      }
     }
   }
 

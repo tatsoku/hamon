@@ -10,6 +10,9 @@ default:
 @link name="hsh":
   scripts/build.sh -l {{name}}
 
+@test:
+  scripts/build.sh -t
+
 @build name="hsh":
   just compile {{name}}
   just link {{name}}

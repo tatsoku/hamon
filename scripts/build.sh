@@ -49,6 +49,11 @@ SRC="$(pwd)/src"
 OUT="$(pwd)/out"
 BIN="$(pwd)/bin"
 DIR="${SRC}/hamon"
+
+TEST="$(pwd)/test"
+TEST_OUT="${TEST}/out"
+TEST_BIN="${TEST}/bin"
+
 #INCLUDE="$(pwd)/include"
 COLOR=true
 
@@ -90,7 +95,7 @@ handle_failure() {
 }
 
 print_help() {
-cat << EOF
+	cat <<EOF
 ${RED}${__NAME__}${CLEAR} v${GREEN}${__VERSION__}${CLEAR}
 Licensed under: ${CYAN}${__LICENSE__}${CLEAR}
 
@@ -99,7 +104,10 @@ ${RED}-c${CLEAR} | ${RED}--compile${CLEAR}
 Compiles ${CYAN}${SRC}/main.c${CLEAR} & all files in ${CYAN}${DIR}/${CLEAR}.
 
 ${RED}-l${CLEAR} | ${RED}--link${CLEAR}
-Links all the files in ${CYAN}${OUT}/${CLEAR} to an executable with ${BLUE}{EXECUTABLE_NAME}${CLEAR}
+Links all the files in ${CYAN}${OUT}/${CLEAR} to an executable with ${BLUE}{EXECUTABLE_NA}ME}${CLEAR}
+
+${RED}-t${CLEAR} | ${RED}--test${CLEAR}
+Runs unit tests in ${TEST}
 
 ${RED}-d${CLEAR} | ${RED}--delete${CLEAR} | ${RED}--clean${CLEAR}
 Cleans all files in ${CYAN}${BIN}/${CLEAR} & ${CYAN}${OUT}/${CLEAR}
@@ -196,6 +204,93 @@ link() {
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 }
+
+unit_test() {
+	local -a TESTS
+	local TEST_FILE
+	local TRIMMED_TEST_FILE
+	local TRIMMED_TEST_FILENAME
+
+	local -a TESTOBJS
+	local TEST_OBJ_FILE
+	local TRIMMED_TEST_OBJ_FILE
+	local TRIMMED_TEST_OBJ_FILENAME
+
+	local -a TESTBINS
+	local TEST_BINARY
+	local TRIMMED_BINARY
+	local TRIMMED_BINARY_NAME
+
+	if [[ ! -d ${TEST_OUT} ]]; then
+		mkdir "${TEST_OUT}"
+	fi
+
+	if [[ ! -d ${TEST_OUT}/unity ]]; then
+		mkdir "${TEST_OUT}/unity"
+	fi
+
+	if [[ ! -d ${TEST_OUT}/deps ]]; then
+		mkdir "${TEST_OUT}/deps"
+	fi
+
+	if [[ ! -d ${TEST_BIN} ]]; then
+		mkdir "${TEST_BIN}"
+	fi
+
+	mapfile -t TESTS < <(find "${TEST}" -maxdepth 1 -type f -name "*.c")
+
+	pushd "${TEST}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+
+	echo -e "${BLUE}>${CLEAR} Building ${CYAN}unity.c${CLEAR}"
+	"${CC}" ${CFLAGS} -c "${TEST}/unity/unity.c" -o "${TEST_OUT}/unity/unity.o"
+	echo -e "${GREEN}✓${CLEAR} Successfully built ${CYAN}unity.c${CLEAR}"
+
+	for TEST_FILE in "${TESTS[@]}"; do
+		if [[ -s "${TEST_FILE}" ]]; then
+			TRIMMED_TEST_FILE="${TEST_FILE%.*}"
+			TRIMMED_TEST_FILENAME="${TRIMMED_TEST_FILE##*/}"
+
+			echo -e "${BLUE}>${CLEAR} Building ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR} & ${CYAN}${TRIMMED_TEST_FILENAME:5}.c${CLEAR}"
+			"${CC}" ${CFLAGS} -c "${TRIMMED_TEST_FILENAME}.c" -o "${TEST_OUT}/${TRIMMED_TEST_FILENAME}.o"
+			"${CC}" ${CFLAGS} -c "${DIR}/${TRIMMED_TEST_FILENAME:5}.c" -o "${TEST_OUT}/deps/${TRIMMED_TEST_FILENAME:5}.o"
+			echo -e "${GREEN}✓${CLEAR} Successfully built ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR} & ${CYAN}${TRIMMED_TEST_FILENAME:5}${CLEAR}"
+		fi
+	done
+
+	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+
+	mapfile -t TESTOBJS < <(find "${TEST_OUT}" -maxdepth 1 -type f -name "*.o")
+
+	pushd "${TEST_OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+
+	for TEST_OBJ_FILE in "${TESTOBJS[@]}"; do
+		TRIMMED_TEST_OBJ_FILE="${TEST_OBJ_FILE%.*}"
+		TRIMMED_TEST_OBJ_FILENAME="${TRIMMED_TEST_OBJ_FILE##*/}"
+
+		echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
+		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${TEST_BIN}/${TRIMMED_TEST_OBJ_FILENAME}" "${TRIMMED_TEST_OBJ_FILENAME}.o" "./deps/${TRIMMED_TEST_OBJ_FILENAME:5}.o" "${TEST_OUT}/unity/unity.o"
+		echo -e "${GREEN}✓${CLEAR} Successfully linked ${CYAN}${TRIMMED_TEST_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
+	done
+
+	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+
+	mapfile -t TESTBINS < <(find "${TEST_OUT}" -maxdepth 1 -type f)
+
+	pushd "${TEST_BIN}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+
+	for TEST_BINARY in "${TESTBINS[@]}"; do
+		TRIMMED_BINARY="${TEST_BINARY%.*}"
+		TRIMMED_BINARY_NAME="${TRIMMED_BINARY##*/}"
+
+		echo -e "${BLUE}>${CLEAR} Running test: ${CYAN}${TRIMMED_BINARY_NAME}${CLEAR}"
+		"./${TRIMMED_BINARY_NAME}"
+	done
+
+	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+
+	rm -fr "${TEST_OUT}" "${TEST_BIN}"
+}
+
 # removes dangling object files that shouldn't be there, used to be required, not that much as of lately though.
 
 clean_dangling() {
@@ -203,8 +298,8 @@ clean_dangling() {
 	local DIR2
 	local LINE
 
-	DIR1=${DIR}
-	DIR2=${OUT}
+	DIR1=${1}
+	DIR2=${2}
 
 	# Extract .c and .o filenames without paths and store them in temporary files
 	find "$DIR1" -name "*.c" -exec basename {} \; >"temp_dir1_files.txt"
@@ -227,14 +322,30 @@ clean_dangling() {
 
 clean() {
 	local CLEAN
+	local LOCALOUT
+	local LOCALBIN
+	local LOG
 
-	echo -e "${RED}!${CLEAR} Cleaning ${CYAN}${OUT}${CLEAR} & ${CYAN}${BIN}${CLEAR}."
-	echo -ne "${RED}!${CLEAR} You sure you want to proceed? [${GREEN}y${CLEAR}/${RED}N${CLEAR}]: "
-	read -r CLEAN
-	if [[ ${CLEAN} =~ [Nn] ]]; then
-		rm -fr "${OUT:?}/*"
-		rm -fr "${BIN:?}/*"
-		echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${OUT}${CLEAR} & ${CYAN}${BIN}${CLEAR} successfully."
+	LOCALOUT=${1}
+	LOCALBIN=${2}
+	CONFIRMATION=${3}
+	LOG=${4:true}
+	
+	if ${LOG}; then
+		echo -e "${RED}!${CLEAR} Cleaning ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR}."
+	fi
+	if ! [[ ${CONFIRMATION} =~ [yY] ]]; then
+		echo -ne "${RED}!${CLEAR} You sure you want to proceed? [${GREEN}y${CLEAR}/${RED}N${CLEAR}]: "
+		read -r CLEAN
+	else
+		CLEAN="y"
+	fi
+	if [[ ${CLEAN} =~ [Yy] ]]; then
+		rm -fr "${LOCALOUT:?}/*"
+		rm -fr "${LOCALBIN:?}/*"
+		if ${LOG}; then
+			echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR} successfully."
+		fi
 	else
 		echo -e "${GREEN}✓${CLEAR} Cancelled."
 	fi
@@ -266,11 +377,14 @@ case $1 in
 	compile
 	;;
 "-l" | "--link")
-	clean_dangling
+	clean_dangling "${DIR}" "${OUT}"
 	link "${2}"
 	;;
+"-t" | "--test")
+	unit_test
+	;;
 "-d" | "--delete" | "--clean")
-	clean
+	clean "${OUT}" "${BIN}" "n"
 	;;
 "-vg" | "--delete-cores" | "--delete-vgcores" | "--clean-vgcores" | "--clean-cores")
 	clear_vgcores

@@ -11,6 +11,14 @@ pkgs.mkShell {
     pre-commit
     bash-language-server
     valgrind
+    yamlfix
+    yamlfmt
+    alejandra
+    cbfmt
+    mdformat
+    beautysh
+    shfmt
+    uncrustify
   ];
   shellHook = ''
   '';

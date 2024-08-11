@@ -22,13 +22,12 @@ int check_if_folder_exists(const char *folder_path) {
   if (stat(folder_path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
     // success!
     return 1;
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 int create_folder(const char *folder_path) {
-#if __linux__
+#ifdef __linux__
   if (mkdir(folder_path, 0700) == -1) {
     perror("Failed to create directory");
     return 0;
@@ -38,8 +37,9 @@ int create_folder(const char *folder_path) {
     perror("Failed to create directory");
     return 0;
   }
+#else
+#error "Use a better operating system, loser"
 #endif
-
   return 1;
 }
 
@@ -74,7 +74,6 @@ char *read_file(const char *file_path) {
   }
 
   size_t bytes_read = 0;
-
   bytes_read = fread(buffer, 1, buffer_size, file);
   if (bytes_read != buffer_size) {
     fprintf(stderr,
@@ -87,16 +86,15 @@ char *read_file(const char *file_path) {
   }
 
   fclose(file);
-
   return buffer;
 }
 
 int compare_file_contents(const char *file_path, char *contents) {
-
   char *file_content = read_file(file_path);
 
   if (strcmp(contents, file_content) == 0) {
     return 1;
   }
+
   return 0;
 }

@@ -1,14 +1,14 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#if __linux__
+#ifdef __linux__
 
-#include <unistd.h>
-#include <sys/wait.h>
 #include <errno.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #elif _WIN32
 
@@ -16,6 +16,6 @@
 
 #endif
 
-int execute(char *executable, char**argv, int status);
+int execute(char *executable, char **argv, int status);
 
 #endif // !EXEC_H

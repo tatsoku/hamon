@@ -7,4 +7,3 @@
 int process_args(char *argv[]);
 
 #endif // !CLI_H
-

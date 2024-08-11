@@ -1,11 +1,11 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
-#if _WIN32
+#ifdef _WIN32
 
 #include <io.h>
 
