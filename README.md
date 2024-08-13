@@ -10,8 +10,15 @@ Compiled with
 [clang](https://github.com/llvm/llvm-project/tree/main/clang) or
 [gcc](https://gcc.gnu.org) & linked with [mold](https://github.com/rui314/mold).
 
-![[LICENSE](https://github.com/h4rldev/hshell/blob/main/LICENSE)](https://img.shields.io/github/license/h4rldev/hshell?style=flat-square)
-![[OpenSSF Scorecard](https://securityscorecards.dev/viewer/?uri=github.com/h4rldev/hshell)](https://api.securityscorecards.dev/projects/github.com/h4rldev/hshell/badge?style=flat-square)
+
+<a href="https://github.com/tatsoku/hamon/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/tatsoku/hamon?style=flat-square"
+    alt="License: BSD 3-Clause" />
+</a>
+<a href="https://securityscorecards.dev/viewer/?uri=github.com/tatsoku/hamon">
+    <img src="https://api.securityscorecards.dev/projects/github.com/tatsoku/hamon/badge?style=flat-square"
+    alt="OpenSSF Scorecard" />
+</a>
 
 > \[!NOTE\]
 > This project is in no way functional yet!
