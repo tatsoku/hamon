@@ -221,6 +221,21 @@ unit_test() {
 	local TRIMMED_BINARY
 	local TRIMMED_BINARY_NAME
 
+	if [[ ! -d ${TEST}/unity ]]; then
+		mkdir "${TEST}/unity"
+		mkdir temp_dir
+
+		pushd temp_dir >/dev/null || handle_failure "Failed to pushd"
+		git clone https://github.com/ThrowTheSwitch/Unity
+
+		rm Unity/src/meson.build
+		mv Unity/src/* "${TEST}/unity"
+
+		popd >/dev/null || handle_failure "Failed to popd"
+
+		rm -fr temp_dir
+	fi
+
 	if [[ ! -d ${TEST_OUT} ]]; then
 		mkdir "${TEST_OUT}"
 	fi
