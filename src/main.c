@@ -39,7 +39,7 @@ int init_shell(void) {
 
 int main(int argc, char *argv[]) {
   if (argc > 1) {
-    return process_args(argv);
+    return process_args(argc, argv);
   }
   // gen_default_config();
 

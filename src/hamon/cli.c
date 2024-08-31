@@ -26,18 +26,14 @@ void split_array(char *array[], const int size, SplitPair *pairs) {
 typedef struct {
   char **flags;
   const int flagsc;
-  const char *flags_esc;
   const char *info;
-  const char *info_esc;
   const char *use;
-  const char *use_esc;
   char *first_arg;
   const int first_arg_len;
 } Info;
 
 int info_for_flag(Info *info) {
   char **flags = info->flags;
-  const char *flags_esc = info->flags_esc;
   char *first_arg = info->first_arg;
   int first_arg_len = info->first_arg_len;
   const char *use = info->use;
@@ -52,12 +48,12 @@ int info_for_flag(Info *info) {
   snprintf(buffer, ((first_arg_len * 2 + strlen(use)) - 3), use, first_arg,
            first_arg);
 
-  printf("%s%s", flags_esc, flags[0]);
+  printf("%s", flags[0]);
   for (int flag_row = 1; flag_row < info->flagsc - 1; flag_row++) {
-    printf(CLEAR " | %s%s" CLEAR, flags_esc, flags[flag_row]);
+    printf(" | %s", flags[flag_row]);
   }
-  printf("\n%s%s\n" CLEAR, info->info_esc, info->info);
-  printf("USAGE: %s%s\n\n" CLEAR, info->use_esc, buffer);
+  printf("\n%s\n", info->info);
+  printf("USAGE: %s\n\n", buffer);
   free(buffer);
   return 0;
 }
@@ -78,55 +74,28 @@ int help(Help *help) {
 
   SplitPair flag_pairs[infoc];
 
-  char *codes[][3] = {{ITALIC_CODE, GREEN_CODE},
-                      {BOLD_CODE, UNDERLINE_CODE, CYAN_CODE},
-                      {BOLD_CODE, BLUE_CODE},
-                      {BOLD_CODE, GREEN_CODE},
-                      {BOLD_CODE, MAGENTA_CODE}};
-  char *flags_esc = assemble(codes[0], 2);
-  char *title_esc = assemble(codes[1], 3);
-  char *lic_esc = assemble(codes[2], 2);
-  char *aut_esc = assemble(codes[3], 2);
-  char *use_esc = assemble(codes[4], 2);
-
-  printf("%s%s%s %sv%s%s %s %s help\n\n" CLEAR, title_esc, __NAME__, CLEAR,
-         BOLD, __PROGRAM_VERSION__, CLEAR, STRIKETHROUGH, CLEAR);
-
-  free(title_esc);
+  printf("%s v%s %s %s help\n\n", __NAME__, __PROGRAM_VERSION__, STRIKETHROUGH,
+         CLEAR);
 
   split_array(help->flags, help->flagsc, flag_pairs);
   for (int help_line = 0; help_line < help->infoc; help_line++) {
     char *split_flags[2] = {flag_pairs[help_line].first,
                             flag_pairs[help_line].second};
-    Info flag_info = {
-        split_flags,    infoc,   flags_esc,       help->info[help_line], BOLD,
-        use[help_line], use_esc, help->first_arg, help->first_arg_len};
+    Info flag_info = {split_flags,    infoc,           help->info[help_line],
+                      use[help_line], help->first_arg, help->first_arg_len};
     info_for_flag(&flag_info);
   }
-  free(use_esc);
-  free(flags_esc);
 
-  printf("Licensed under the %s%s\n" CLEAR, lic_esc, __LICENSE__);
-  printf("Made with %s❤%s by %s%s\n" CLEAR, RED, CLEAR, aut_esc, __AUTHOR__);
-
-  free(lic_esc);
-  free(aut_esc);
+  printf("Licensed under the %s\n", __LICENSE__);
+  printf("Made with %s❤%s by %s\n", RED, CLEAR, __AUTHOR__);
 
   return 0;
 }
 
 int print_ver(void) {
-  char *title_c[3] = {BOLD_CODE, UNDERLINE_CODE, CYAN_CODE};
-  char *title_esc = assemble(title_c, (sizeof(title_c) / sizeof(title_c[0])));
-  char *aut_c[2] = {BOLD_CODE, GREEN_CODE};
-  char *aut_esc = assemble(aut_c, (sizeof(aut_c) / sizeof(aut_c[0])));
+  printf("%s v%s %s %s Made with %s❤%s by %s\n", __NAME__, __PROGRAM_VERSION__,
+         STRIKETHROUGH, CLEAR, RED, CLEAR, __AUTHOR__);
 
-  printf("%s%s%s %sv%s%s %s %s Made with %s❤%s by %s%s\n" CLEAR, title_esc,
-         __NAME__, CLEAR, BOLD, __PROGRAM_VERSION__, CLEAR, STRIKETHROUGH,
-         CLEAR, RED, CLEAR, aut_esc, __AUTHOR__);
-
-  free(title_esc);
-  free(aut_esc);
   return 0;
 }
 
@@ -139,7 +108,8 @@ int get_flag_int(const char *flag, char *flags[], const int flagsc) {
   return -1;
 }
 
-int process_args(char *argv[]) {
+int process_args(int argc, char *argv[]) {
+
   char *flags[] = {"-h", "--help", "-v", "--version", "-c", "--config"};
   const char *infos[] = {"Prints this message.", "Shows program version.",
                          "Load a config file from other path than default"};
@@ -158,22 +128,40 @@ int process_args(char *argv[]) {
   switch (cur_flag) {
   case 0:
   case 1:
+    if (argc > 2) {
+      puts("Too many arguments passed.");
+      help(&help_data);
+      return 1;
+    }
+
     help(&help_data);
     break;
 
   case 2:
   case 3:
+    if (argc > 2) {
+      puts("Too many arguments passed.");
+      help(&help_data);
+      return 1;
+    }
+
     print_ver();
     break;
 
   case 4:
   case 5:
+    if (argc < 3) {
+      puts("Provide a config file.");
+      help(&help_data);
+      return 1;
+    }
     puts("config file thing");
     break;
 
   default:
     puts("Incorrect command.");
     help(&help_data);
+    return 1;
   }
 
   return 0;

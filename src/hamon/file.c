@@ -1,12 +1,20 @@
-
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
+#include <wchar.h>
 
 #ifdef _WIN32
 
 #include <io.h>
+#include <windows.h>
 
+#elif __linux__
+
+#include <dirent.h>
+#include <sys/stat.h>
+
+#else
+#error "Use a better operating system, loser"
 #endif
 
 #define COLORS
@@ -52,6 +60,41 @@ int create_folder(const char *folder_path) {
 #error "Use a better operating system, loser"
 #endif
   return 1;
+}
+
+int remove_folder(const char *path) {
+  DIR *dir;
+  struct dirent *ent;
+
+  if ((dir = opendir(path)) != 0) {
+    while ((ent = readdir(dir)) != 0) {
+      if (strncmp(ent->d_name, ".", 1) == 0 ||
+          strncmp(ent->d_name, "..", 2) == 0)
+        continue;
+
+#ifdef __linux__
+      char full_path[1024] = {0};
+#elif _WIN32
+      char full_path[MAX_PATH] = {0};
+#endif
+      snprintf(full_path, sizeof(full_path), "%s/%s", path, ent->d_name);
+
+      struct stat sb;
+      if (stat(full_path, &sb) == 0 && S_ISDIR(sb.st_mode))
+        remove_folder(full_path);
+      else
+        remove(full_path);
+    }
+    closedir(dir);
+  }
+
+#ifdef _WIN32
+  RemoveDirectoryW(path);
+#elif __linux__
+  remove(path);
+#endif
+
+  return 0;
 }
 
 char *read_file(const char *file_path) {

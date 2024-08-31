@@ -16,19 +16,19 @@ void test_echo() {
 
   printf(BLUE ">%s Running echo with no flags\n", CLEAR);
   int status0 = builtin_echo(2, argv0);
-  TEST_ASSERT_EQUAL_INT8(status0, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status0);
 
   printf(BLUE ">%s Running echo with -n\n", CLEAR);
   int status1 = builtin_echo(3, argv1);
-  TEST_ASSERT_EQUAL_INT8(status1, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status1);
 
   printf(BLUE ">%s Running echo with -E\n", CLEAR);
   int status2 = builtin_echo(3, argv2);
-  TEST_ASSERT_EQUAL_INT8(status2, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status2);
 
   printf(BLUE ">%s Running echo with too many args\n", CLEAR);
   int status3 = builtin_echo(4, argv3);
-  TEST_ASSERT_EQUAL_INT8(status3, 1);
+  TEST_ASSERT_EQUAL_INT8(1, status3);
 }
 
 void test_help() {
@@ -38,15 +38,15 @@ void test_help() {
 
   printf(BLUE ">%s Running help without args.\n", CLEAR);
   int status0 = builtin_help(1, argv0);
-  TEST_ASSERT_EQUAL_INT8(status0, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status0);
 
   printf(BLUE ">%s Running help with 1 arg of -h\n", CLEAR);
   int status1 = builtin_help(2, argv1);
-  TEST_ASSERT_EQUAL_INT8(status1, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status1);
 
   printf(BLUE ">%s Running help with too many args.\n", CLEAR);
   int status2 = builtin_help(3, argv2);
-  TEST_ASSERT_EQUAL_INT8(status2, 1);
+  TEST_ASSERT_EQUAL_INT8(1, status2);
 }
 
 void test_pwd() {
@@ -56,12 +56,12 @@ void test_pwd() {
 
   printf(BLUE ">%s Running pwd like normal.\n", CLEAR);
   int status0 = builtin_pwd(1, argv0);
-  TEST_ASSERT_EQUAL_INT8(status0, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status0);
 
   printf(BLUE ">%s Running pwd with args (pwd shouldn't have any args).\n",
          CLEAR);
   int status1 = builtin_pwd(2, argv1);
-  TEST_ASSERT_EQUAL_INT8(status1, 1);
+  TEST_ASSERT_EQUAL_INT8(1, status1);
 }
 
 void test_cd() {
@@ -76,22 +76,22 @@ void test_cd() {
   builtin_pwd(1, pwd);
   printf(BLUE ">%s Changing directory to ..\n", CLEAR);
   int status0 = builtin_cd(2, argv0);
-  TEST_ASSERT_EQUAL_INT8(status0, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status0);
   builtin_pwd(1, pwd);
 
   printf(BLUE ">%s Changing directory to bin\n", CLEAR);
   int status1 = builtin_cd(2, argv1);
-  TEST_ASSERT_EQUAL_INT8(status0, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status1);
   builtin_pwd(1, pwd);
 
   printf(BLUE ">%s Changing directory to -\n", CLEAR);
   int status2 = builtin_cd(2, argv2);
-  TEST_ASSERT_EQUAL_INT8(status2, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status2);
   builtin_pwd(1, pwd);
 
   printf(BLUE ">%s Changing directory to ~\n", CLEAR);
   int status3 = builtin_cd(2, argv3);
-  TEST_ASSERT_EQUAL_INT8(status3, 0);
+  TEST_ASSERT_EQUAL_INT8(0, status3);
   builtin_pwd(1, pwd);
 
   // restore path
@@ -100,11 +100,11 @@ void test_cd() {
 
   printf(BLUE ">%s Running cd with too little arguments\n", CLEAR);
   int status4 = builtin_cd(1, argv4);
-  TEST_ASSERT_EQUAL_INT8(status4, 1);
+  TEST_ASSERT_EQUAL_INT8(1, status4);
 
   printf(BLUE ">%s Running cd with too many arguments\n", CLEAR);
   int status5 = builtin_cd(3, argv5);
-  TEST_ASSERT_EQUAL_INT8(status5, 1);
+  TEST_ASSERT_EQUAL_INT8(1, status5);
 }
 
 int main() {
