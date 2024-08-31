@@ -13,6 +13,9 @@ default:
 @test:
   scripts/build.sh -t
 
+@setup-testing:
+  scripts/build.sh -st
+
 @build name="hsh":
   just compile {{name}}
   just link {{name}}

@@ -1,7 +1,18 @@
+
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+
+#ifdef _WIN32
+
+#include <io.h>
+
+#endif
+
 #define COLORS
 
-#include "headers/file.h"
 #include "headers/escape.h"
+#include "headers/file.h"
 
 int write_file(const char *filename, const char *content, const size_t size) {
   FILE *file = fopen(filename, "w");

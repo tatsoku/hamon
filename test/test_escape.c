@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #define COLORS
 #define GRAPHICS
 
@@ -13,7 +15,6 @@ void tearDown() { free(assembled_escape); };
 void test_assemble(void) {
   printf("\n%sThis is what the escape looks like on your terminal! \n" CLEAR,
          assembled_escape);
-  TEST_ASSERT_EQUAL_INT8(1, 2);
 }
 
 int main(void) {

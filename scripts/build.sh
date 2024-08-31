@@ -106,6 +106,10 @@ Compiles ${CYAN}${SRC}/main.c${CLEAR} & all files in ${CYAN}${DIR}/${CLEAR}.
 ${RED}-l${CLEAR} | ${RED}--link${CLEAR}
 Links all the files in ${CYAN}${OUT}/${CLEAR} to an executable with ${BLUE}{EXECUTABLE_NA}ME}${CLEAR}
 
+${RED}-st${CLEAR} | ${RED}--setup-testing${CLEAR}
+Sets up and installs unity in the correct path.
+(Automatically runs if not already installed during --test)
+
 ${RED}-t${CLEAR} | ${RED}--test${CLEAR}
 Runs unit tests in ${TEST}
 
@@ -194,15 +198,32 @@ link() {
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
+			# shellcheck disable=SC2086,SC2048
 			"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
 		fi
 	else
+		# shellcheck disable=SC2086,SC2048
 		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
 	fi
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+}
+
+setup_unity() {
+	mkdir "${TEST}/unity"
+	mkdir temp_dir
+
+	pushd temp_dir >/dev/null || handle_failure "Failed to pushd"
+	git clone https://github.com/ThrowTheSwitch/Unity
+
+	rm Unity/src/meson.build
+	mv Unity/src/* "${TEST}/unity"
+
+	popd >/dev/null || handle_failure "Failed to popd"
+
+	rm -fr temp_dir
 }
 
 unit_test() {
@@ -222,18 +243,7 @@ unit_test() {
 	local TRIMMED_BINARY_NAME
 
 	if [[ ! -d ${TEST}/unity ]]; then
-		mkdir "${TEST}/unity"
-		mkdir temp_dir
-
-		pushd temp_dir >/dev/null || handle_failure "Failed to pushd"
-		git clone https://github.com/ThrowTheSwitch/Unity
-
-		rm Unity/src/meson.build
-		mv Unity/src/* "${TEST}/unity"
-
-		popd >/dev/null || handle_failure "Failed to popd"
-
-		rm -fr temp_dir
+		setup_unity
 	fi
 
 	if [[ ! -d ${TEST_OUT} ]]; then
@@ -283,6 +293,7 @@ unit_test() {
 		TRIMMED_TEST_OBJ_FILENAME="${TRIMMED_TEST_OBJ_FILE##*/}"
 
 		echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
+		# shellcheck disable=SC2086,SC2048
 		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${TEST_BIN}/${TRIMMED_TEST_OBJ_FILENAME}" "${TRIMMED_TEST_OBJ_FILENAME}.o" "./deps/${TRIMMED_TEST_OBJ_FILENAME:5}.o" "${TEST_OUT}/unity/unity.o"
 		echo -e "${GREEN}✓${CLEAR} Successfully linked ${CYAN}${TRIMMED_TEST_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
 	done
@@ -345,7 +356,7 @@ clean() {
 	LOCALBIN=${2}
 	CONFIRMATION=${3}
 	LOG=${4:true}
-	
+
 	if ${LOG}; then
 		echo -e "${RED}!${CLEAR} Cleaning ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR}."
 	fi
@@ -394,6 +405,9 @@ case $1 in
 "-l" | "--link")
 	clean_dangling "${DIR}" "${OUT}"
 	link "${2}"
+	;;
+"-st" | "--setup-testing")
+	setup_unity
 	;;
 "-t" | "--test")
 	unit_test

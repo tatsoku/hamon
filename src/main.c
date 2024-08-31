@@ -1,8 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #define COLORS
 #define GRAPHICS
 
 #include "hamon/headers/cli.h"
-#include "hamon/headers/config.h"
 #include "hamon/headers/escape.h"
 #include "hamon/headers/meta.h"
 #include "hamon/headers/prompt.h"
@@ -42,13 +44,5 @@ int main(int argc, char *argv[]) {
   // gen_default_config();
 
   // init_shell();
-  // init_prompt();
-  char *codes[2] = {CYAN_CODE, ITALIC_CODE};
-  char *assembled_escape = assemble(codes, 2);
-
-  printf("\n%sThis is what the escape looks like on your terminal! \n" CLEAR,
-         assembled_escape);
-
-  free(assembled_escape);
-  return 0;
+  return init_prompt();
 }

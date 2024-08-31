@@ -2,14 +2,6 @@
 #define FILE_H
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-
-#include <io.h>
-
-#endif
 
 int write_file(const char *filename, const char *content, const size_t size);
 int check_if_folder_exists(const char *folder_path);

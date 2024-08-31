@@ -1,7 +1,25 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#ifdef __linux__
+
+#include <errno.h>
+#include <linux/fcntl.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#elif _WIN32
+
+#include <windows.h>
+
+#endif
+
 #define COLORS
 
-#include "headers/exec.h"
 #include "headers/escape.h"
+#include "headers/exec.h"
 
 #if _WIN32
 
@@ -41,11 +59,14 @@ int execute(char *executable, char **argv, int status) {
     if (execvp(executable, argv) == -1) {
       if (errno == ENOENT) {
         fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
-        exit(1);
+        exit(-1);
       }
 
       perror("Failed to exec to childprocess. (execvp)");
-      exit(1);
+      exit(-1);
+    } else {
+      argv = 0;
+      exit(0);
     }
   } else {
     wait(&status);

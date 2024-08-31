@@ -1,5 +1,10 @@
 #define COLORS
 #define GRAPHICS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "headers/escape.h"
 
 char *assemble(char *codes[], int codesc) {

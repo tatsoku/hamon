@@ -1,5 +1,4 @@
-{ pkgs ? import <nixpkgs> {}}:
-
+{pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
   allowUnfree = true;
   name = "hamon!";
@@ -18,8 +17,9 @@ pkgs.mkShell {
     mdformat
     beautysh
     shfmt
-    uncrustify
+    shellcheck
   ];
   shellHook = ''
+    pre-commit install
   '';
 }

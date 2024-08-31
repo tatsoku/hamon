@@ -1,9 +1,27 @@
+
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifdef __linux__
+
+#include <unistd.h>
+
+#elif _WIN32
+
+#include <windows.h>
+
+#else
+#error "Use a better operating system, loser"
+#endif
+
 #define CURSORS
-#include "headers/prompt.h"
+
 #include "headers/builtins.h"
-#include "headers/config.h"
 #include "headers/escape.h"
 #include "headers/exec.h"
+#include "headers/prompt.h"
 
 char *get_hostname() {
   char *hostname = 0;
@@ -67,8 +85,7 @@ void tokenize(char *input, char **tokens_buffer, char **save_ptr) {
     token = strtok_r(0, " \n", save_ptr);
     token_index++;
   }
-  tokens_buffer[token_index] = "\0";
-  input = 0;
+  tokens_buffer[token_index] = 0;
 }
 
 int init_prompt() {
@@ -77,8 +94,9 @@ int init_prompt() {
   char *argv[4096] = {0};
   char *save_ptr = {0};
   int status = 0;
+  int argc = 0;
 
-  while (1) {
+  for (;;) {
     printf("%s%s ", VERTICAL_CURSOR, prompt);
     if (fgets(input_buf, 4096, stdin) == 0) {
       perror("fgets");
@@ -86,21 +104,19 @@ int init_prompt() {
     }
 
     input_buf[strcspn(input_buf, "\n")] = 0;
-
-    if (strncmp(input_buf, "", 1) == 0) {
+    if (strncmp(input_buf, "", 1) == 0)
       continue;
-    }
 
     tokenize(input_buf, argv, &save_ptr);
 
-    int argc = sizeof(argv) / sizeof(argv[0]);
+    while (argv[argc] != 0)
+      argc++;
 
-    if (!check_builtins(argc, argv)) {
-      if (execute(argv[0], argv, status) == -1) {
+    if (check_builtins(argc, argv) == -1) {
+      if (execute(argv[0], argv, status) == -1)
         continue;
-      }
     }
-  }
 
-  return 0;
+    argc = 0;
+  }
 }

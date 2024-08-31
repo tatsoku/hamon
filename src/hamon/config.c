@@ -1,11 +1,12 @@
 #define COLORS
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "headers/config.h"
 #include "headers/escape.h"
 #include "headers/file.h"
-
-// includes.
-#include "../../include/toml-c.h"
 
 /*
  * Default configuration:
@@ -80,8 +81,10 @@ const char *default_config =
     "# ██    ██  ▄██▀▀▀██  ██ ██ ██  ██    ██  ██    ██  ▀▀\n"
     "# ██    ██  ██▄▄▄███  ██ ██ ██  ▀██▄▄██▀  ██    ██  ▄▄\n"
     "# ▀▀    ▀▀   ▀▀▀▀ ▀▀  ▀▀ ▀▀ ▀▀    ▀▀▀▀    ▀▀    ▀▀  ▀▀\n\n"
+
     "# !! Main configuration for theming and prompt\n"
     "# More advanced theming will happen at a way later date.\n\n"
+
     "[prompt]\n"
     "hostname          = true\n"
     "username          = true\n"
@@ -91,20 +94,26 @@ const char *default_config =
     "color             = true\n"
     "nerd_fonts        = true\n"
     "prompt            = \">\"\n\n"
+
     "# Format settings.\n"
     "# If something isn't enabled, just remove it from the format\n"
     "# or leave it in, it will be ignored anyway.\n\n"
+
     "format = \"{username_icon} {username} @ {hostname_icon} {hostname} | "
     "{cd}{git_icon}{git_tree} {git}\"\n\n"
+
     "# !! Color config,\n"
     "# !IMPORTANT! None of these settings will be applied if color is "
     "false.\n\n"
+
     "# Color variations available:\n"
     "# [ \"black\", \"red\", \"green\", \"yellow\", \"blue\", \"magenta\", "
     "\"cyan\" ]\n\n"
+
     "# To keep something uncolored, just set it to \"\".\n"
     "# 256 colors will be supported at a later date. (I'm too lazy to make it "
     "use 256 color ansi escapes currently)\n\n"
+
     "[colors]\n"
     "prompt_bg_color   = \"\"\n"
     "prompt_fg_color   = \"green\"\n\n"
@@ -117,6 +126,7 @@ const char *default_config =
     "# !! Nerd fonts config.\n"
     "# !IMPORTANT! None of these settings will be applied if nerd_fonts is "
     "false.\n\n"
+
     "[nerd_fonts]\n"
     "hostname_icon     = \"󰌢\"\n"
     "username_icon     = \"\"\n"
@@ -151,7 +161,9 @@ int gen_default_config(void) {
   folder_buffer_size = strlen("\\hamon\\") + env_size + 1;
   folder_buffer = (char *)malloc(folder_buffer_size);
   snprintf(folder_buffer, folder_buffer_size, "%s\\hamon\\", getenv("APPDATA"));
-#elif __linux__
+#endif
+
+#ifdef __linux__
   env_size = strlen(getenv("HOME"));
   folder_buffer_size = strlen("/.config/hamon/") + env_size + 1;
   folder_buffer = (char *)malloc(folder_buffer_size);

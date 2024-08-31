@@ -31,6 +31,7 @@
 /*
  * Graphics such as bold, strike through, italics, dim, blink, underline, etc.
  */
+
 #ifdef GRAPHICS
 
 #define BOLD_CODE "1"
@@ -71,6 +72,10 @@
 
 #endif
 
+/*
+ * Weird cursor escapes.
+ */
+
 #ifdef CURSORS
 
 #define ENABLE "l"
@@ -88,12 +93,11 @@
 
 #endif
 
-// Global clear color/graphics mode string.
-#define CLEAR "\033[0m"
+/*
+ * Global clear color/graphics mode string.
+ */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#define CLEAR "\033[0m"
 
 char *assemble(char *codes[], int codesc);
 
