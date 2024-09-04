@@ -1,0 +1,25 @@
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:90:55: warning: unused parameter 'envp' [-Wunused-parameter]
+   90 | int builtin_echo(int argc, char *argv[], char *const *envp) {
+      |                                                       ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:120:55: warning: unused parameter 'envp' [-Wunused-parameter]
+  120 | int builtin_exit(int argc, char *argv[], char *const *envp) {
+      |                                                       ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:139:53: warning: unused parameter 'envp' [-Wunused-parameter]
+  139 | int builtin_cd(int argc, char *argv[], char *const *envp) {
+      |                                                     ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:187:33: warning: unused parameter 'argv' [-Wunused-parameter]
+  187 | int builtin_pwd(int argc, char *argv[], char *const *envp) {
+      |                                 ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:187:54: warning: unused parameter 'envp' [-Wunused-parameter]
+  187 | int builtin_pwd(int argc, char *argv[], char *const *envp) {
+      |                                                      ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:217:55: warning: unused parameter 'envp' [-Wunused-parameter]
+  217 | int builtin_test(int argc, char *argv[], char *const *envp) {
+      |                                                       ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:224:34: warning: unused parameter 'argv' [-Wunused-parameter]
+  224 | int builtin_help(int argc, char *argv[], char *const *envp) {
+      |                                  ^
+/home/h4rl/projects/hamon-1/src/hamon/builtins.c:224:55: warning: unused parameter 'envp' [-Wunused-parameter]
+  224 | int builtin_help(int argc, char *argv[], char *const *envp) {
+      |                                                       ^
+8 warnings generated.

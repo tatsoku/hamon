@@ -24,10 +24,12 @@
 
 BOOL FindExecutableInPath(LPCSTR executable, LPCSTR *path_found) {
   LPCSTR env_var = getenv("PATH");
-  if (env_var == NULL)
+  if (env_var == NULL) {
     fprintf(stderr,
             RED "!%s Failed to find path variable, is your windows pc ok?",
-            CLEAR) return FALSE;
+            CLEAR);
+    return FALSE;
+  }
 
   LPCSTR path = env_var;
   do {
@@ -44,11 +46,9 @@ BOOL FindExecutableInPath(LPCSTR executable, LPCSTR *path_found) {
 
   return FALSE;
 }
-
 #endif
 
 int execute(char *executable, char *argv[], int status, char *const *envp) {
-
 #ifdef __linux__
   pid_t pid = fork();
 

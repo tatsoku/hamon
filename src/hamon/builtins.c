@@ -131,7 +131,7 @@ int builtin_exit(int argc, char *argv[], char *const *envp) {
 #ifdef __linux__
 char last_dir[1024] = {0};
 #elif _WIN32
-char last_dir[MAX_PATH] = {0};
+LPWSTR last_dir[MAX_PATH] = {0};
 #else
 #error "Get a better operating system, loser"
 #endif
@@ -163,15 +163,15 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 
   strlcpy(last_dir, cwd_buf, 1024);
 #elif _WIN32
-  char cwd_buf[MAX_PATH] = {0};
+  LPWSTR cwd_buf[MAX_PATH] = {0};
 
   GetCurrentDirectoryW(MAX_PATH, cwd_buf);
   strlcpy(last_dir, cwd_buf, MAX_PATH);
 
   if (strncmp(path, "~", 1) == 0) {
-    path = getenv("USERPROFILE");
+    strlcpy(path, getenv("USERPROFILE", MAX_PATH);
   } else if (strncmp(path, "-", 1) == 0) {
-    path = last_dir;
+    strlcpy(path, last_dir, MAX_PATH);
   }
 
   if (!SetCurrentDirectory(path)) {
@@ -202,7 +202,7 @@ int builtin_pwd(int argc, char *argv[], char *const *envp) {
   DWORD len = GetCurrentDirectoryW(MAX_PATH, cwd_buf);
 
   if (len > 0 && len <= MAX_PATH) {
-    wprintf(L"Current directory: %s\n", cwd_buf)
+    wprintf(L"Current directory: %s\n", cwd_buf);
   } else {
     win_perror("Can't get current directory");
     return 1;

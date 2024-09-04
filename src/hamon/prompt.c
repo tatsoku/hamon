@@ -75,6 +75,27 @@ char *get_username(void) {
   return username;
 }
 
+#ifdef _WIN32
+LPWCHAR *get_env() {
+  LPWCHAR *env_block = GetEnvironmentStrings();
+  int count = 0;
+  LPWCHAR *var = env_block;
+  while (*var) {
+    count++;
+    var++;
+  }
+  FreeEnvironmentStrings(env_block);
+  LPWCHAR *env_array = (LPWCHAR *)malloc((count + 1) * sizeof(LPWCHAR));
+  var = env_block;
+  for (int i = 0; i < count; i++) {
+    env_array[i] = var;
+    var += wcslen(var) + 1;
+  }
+  env_array[count] = NULL;
+  return env_array;
+}
+#endif
+
 // char *assemble_prompt() { return ">"; }
 
 bool is_env_format(const char *str) {
@@ -98,17 +119,27 @@ int init_prompt(void) {
   char input_buf[4096] = {0};
   char *argv[4096] = {0};
   char *save_ptr = {0};
+  char executable[128] = {0};
+  char *env[1024] = {0};
+
+#ifdef __linux__
+  char **envp = __environ;
+#elif _WIN32
+  LPWCHAR *envp = get_env();
+#endif
+
   int status = 0;
   int argc = 0;
-  char *env[1024] = {0};
   int env_count = 0;
-  char **envp = __environ;
-  char executable[128] = {0};
 
   while (*envp) {
-    env[env_count++] = *envp;
+    env[env_count++] = (char *)*envp;
     envp++;
   }
+
+#ifdef _WIN32
+  free(envp);
+#endif
 
   for (;;) {
     printf("%s%s ", VERTICAL_CURSOR, prompt);

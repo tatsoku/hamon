@@ -179,9 +179,7 @@ int gen_default_config(void) {
     win_perror("snprintf");
     return -1;
   }
-#endif
-
-#ifdef __linux__
+#elif __linux__
   char folder_buffer[1024] = {0};
   char absolute_path_buffer[1024] = {0};
 
