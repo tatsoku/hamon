@@ -13,6 +13,8 @@
 
 #include <windows.h>
 
+#include "headers/error.h"
+
 #endif
 
 #define COLORS
@@ -21,8 +23,7 @@
 #include "headers/exec.h"
 
 #if _WIN32
-
-BOOL FindExecutableInPath(LPCSTR executable, LPCSTR *path_found) {
+BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
   LPCSTR env_var = getenv("PATH");
   if (env_var == NULL) {
     fprintf(stderr,
@@ -92,8 +93,7 @@ int execute(char *executable, char *argv[], int status, char *const *envp) {
             full_path_size + strlen(win_executable) + 1);
 
     if (!CreateProcess(0, full_path, 0, 0, FALSE, 0, 0, 0, &start_i, &proc_i)) {
-      fprintf(stderr, RED "!%s CreateProcess failed (%d).\n", CLEAR,
-              GetLastError());
+      win_perror("CreareProcess");
       return -1;
     }
 

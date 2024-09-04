@@ -70,7 +70,12 @@ if ${COLOR}; then
 fi
 
 CFLAGS="-O3 -Wall -Wextra"
-LINKER_FLAGS="-fuse-ld=mold -Wall -Wextra"
+
+LINKER_FLAGS="-Wall -Wextra"
+
+if [[ ${OSTYPE} != "msys" ]]; then
+	LINKER_FLAGS+=" -fuse-ld=mold"
+fi
 
 if [[ ${2} == "--debug" ]]; then
 	CFLAGS+=" -ggdb"

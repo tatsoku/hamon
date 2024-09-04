@@ -76,16 +76,16 @@ char *get_username(void) {
 }
 
 #ifdef _WIN32
-LPWCHAR *get_env() {
-  LPWCHAR *env_block = GetEnvironmentStrings();
+WCHAR *get_env() {
+  WCHAR *env_block = GetEnvironmentStrings();
   int count = 0;
-  LPWCHAR *var = env_block;
+  WCHAR *var = env_block;
   while (*var) {
     count++;
     var++;
   }
   FreeEnvironmentStrings(env_block);
-  LPWCHAR *env_array = (LPWCHAR *)malloc((count + 1) * sizeof(LPWCHAR));
+  WCHAR *env_array = (WCHAR *)malloc((count + 1) * sizeof(LPWCHAR));
   var = env_block;
   for (int i = 0; i < count; i++) {
     env_array[i] = var;
