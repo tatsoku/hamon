@@ -76,16 +76,16 @@ char *get_username(void) {
 }
 
 #ifdef _WIN32
-WCHAR *get_env() {
-  WCHAR *env_block = GetEnvironmentStrings();
+LPCH *get_env() {
+  LPCH *env_block = GetEnvironmentStrings();
   int count = 0;
-  WCHAR *var = env_block;
+  LPCH *var = env_block;
   while (*var) {
     count++;
     var++;
   }
   FreeEnvironmentStrings(env_block);
-  WCHAR *env_array = (WCHAR *)malloc((count + 1) * sizeof(LPWCHAR));
+  LPCH *env_array = (LPCH *)malloc((count + 1) * sizeof(LPWCHAR));
   var = env_block;
   for (int i = 0; i < count; i++) {
     env_array[i] = var;
@@ -125,7 +125,7 @@ int init_prompt(void) {
 #ifdef __linux__
   char **envp = __environ;
 #elif _WIN32
-  WCHAR *envp = get_env();
+  LPCH *envp = get_env();
 #endif
 
   int status = 0;

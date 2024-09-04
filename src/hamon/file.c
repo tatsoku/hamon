@@ -127,7 +127,7 @@ int check_if_folder_exists(const char *folder_path) {
   if (dw_attrib == INVALID_FILE_ATTRIBUTES) {
     return -1; // Error occurred
   }
-  return (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) ? 1 : -1;
+  return (dw_attrib & FILE_ATTRIBUTE_DIRECTORY) ? 1 : -1;
 #endif
 }
 
@@ -170,14 +170,14 @@ int remove_folder(const char *path) {
       snprintf(full_path, sizeof(full_path), "%s\\%s", path,
                findFileData.cFileName);
 
-      if (check_if_folder_exists)
+      if (check_if_folder_exists(full_path))
         remove_folder(full_path);
       else
         DeleteFileW((LPCWSTR)full_path);
     }
-  } while (FindNextFile(hFind, &findFileData));
+  } while (FindNextFile(hFind, &findFileData))
 
-  FindClose(hFind);
+      FindClose(hFind);
 #else
 #error Use a real operating system, loser
 #endif

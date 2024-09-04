@@ -26,23 +26,23 @@
 BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
   LPCSTR env_var = getenv("PATH");
   if (env_var == NULL) {
-    fprintf(stderr,
-            RED "!%s Failed to find path variable, is your windows pc ok?",
-            CLEAR);
+    fprintf(stderr, "!%s Failed to find path variable\n", CLEAR);
     return FALSE;
   }
 
   LPCSTR path = env_var;
   do {
     size_t len = strlen(path);
-    if (len > 0 && path[len - 1] == ';') {
-      path[len - 1] = '\0'; // Remove trailing semicolon
+    char temp[len + 1];
+    strlcpy(temp, path, len);
+    if (temp[len - 1] == ';') {
+      temp[len - 1] = '\0';
     }
-    if (_stricmp(executable, path) == 0) {
-      *path_found = path;
+    if (_stricmp(executable, temp) == 0) {
+      *path_found = temp;
       return TRUE;
     }
-    path += len + 1; // Move to next directory in PATH
+    path += len + 1;
   } while (*path);
 
   return FALSE;

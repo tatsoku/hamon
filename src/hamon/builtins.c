@@ -131,7 +131,7 @@ int builtin_exit(int argc, char *argv[], char *const *envp) {
 #ifdef __linux__
 char last_dir[1024] = {0};
 #elif _WIN32
-LPWCHAR last_dir[MAX_PATH] = {0};
+WCHAR last_dir[MAX_PATH] = {0};
 #else
 #error "Get a better operating system, loser"
 #endif
