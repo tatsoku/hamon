@@ -75,6 +75,8 @@ LINKER_FLAGS="-Wall -Wextra"
 
 if [[ ${OSTYPE} != "msys" ]]; then
 	LINKER_FLAGS+=" -fuse-ld=mold"
+else
+	LINKER_FLAGS+=" -lbsd"
 fi
 
 if [[ ${2} == "--debug" ]]; then
