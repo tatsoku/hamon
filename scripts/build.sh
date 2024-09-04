@@ -76,7 +76,7 @@ LINKER_FLAGS="-Wall -Wextra"
 if [[ ${OSTYPE} != "msys" ]]; then
 	LINKER_FLAGS+=" -fuse-ld=mold"
 else
-	CFLAGS+="-I/usr/include/bsd"
+	CFLAGS+=" -I/usr/include/bsd"
 	LINKER_FLAGS+=" -lbsd"
 fi
 
