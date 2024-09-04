@@ -77,6 +77,7 @@ if [[ ${OSTYPE} != "msys" ]]; then
 	LINKER_FLAGS+=" -fuse-ld=mold"
 else
 	CFLAGS+=" -I/usr/include"
+	LINKER_FLAGS="-lbsd ${LINKER_FLAGS}"
 fi
 
 if [[ ${2} == "--debug" ]]; then

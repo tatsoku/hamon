@@ -169,7 +169,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 #elif _WIN32
   char cwd_buf[MAX_PATH] = {0};
 
-  GetCurrentDirectory(MAX_PATH, (LPTSTR)cwd_buf);
+  GetCurrentDirectory(MAX_PATH, (LPWSTR)cwd_buf);
   strlcpy(last_dir, cwd_buf, MAX_PATH);
 
   if (strncmp(path, "~", 1) == 0) {
@@ -178,7 +178,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
     strlcpy(path, last_dir, MAX_PATH);
   }
 
-  if (!SetCurrentDirectory((LPTSTR)path)) {
+  if (!SetCurrentDirectory((LPWSTR)path)) {
     win_perror("Couldn't change directory.");
     return 1;
   }
@@ -203,10 +203,10 @@ int builtin_pwd(int argc, char *argv[], char *const *envp) {
   }
 #elif _WIN32
   char cwd_buf[MAX_PATH];
-  DWORD len = GetCurrentDirectoryW(MAX_PATH, (LPTSTR)cwd_buf);
+  DWORD len = GetCurrentDirectoryW(MAX_PATH, (LPWSTR)cwd_buf);
 
   if (len > 0 && len <= MAX_PATH) {
-    wprintf(L"Current directory: %s\n", (LPTSTR)cwd_buf);
+    wprintf(L"Current directory: %s\n", (LPWSTR)cwd_buf);
   } else {
     win_perror("Can't get current directory");
     return 1;
