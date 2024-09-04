@@ -3,7 +3,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __linux__
+
 #include <string.h>
+
+#elif _WIN32
+
+#include <bsd/string.h>
+
+#else
+#error Get a better operating system, loser
+#endif
 
 #include "headers/escape.h"
 

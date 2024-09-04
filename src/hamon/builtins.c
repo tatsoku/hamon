@@ -6,18 +6,22 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 
 #ifdef __linux__
 
+#include <string.h>
 #include <unistd.h>
 
 #elif _WIN32
-#include "headers/error.h"
+
+#include <bsd/string.h>
 #include <windows.h>
+
+#include "headers/error.h"
+
 #else
-#error "Get a better operating system, loser."
+#error Get a better operating system, loser.
 #endif
 
 enum BuiltinType { Echo, Exit, Cd, Pwd, Help };

@@ -1,15 +1,15 @@
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef __linux__
 
+#include <string.h>
 #include <unistd.h>
 
 #elif _WIN32
 
+#include <bsd/string.h>
 #include <windows.h>
 
 #else

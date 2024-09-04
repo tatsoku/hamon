@@ -3,7 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __linux__
+
 #include <string.h>
+
+#elif _WIN32
+
+#include <bsd/string.h>
+
+#endif
 
 #include "headers/cli.h"
 #include "headers/escape.h"

@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #ifdef _WIN32
 
+#include <bsd/string.h>
 #include <io.h>
 #include <windows.h>
 
@@ -12,10 +12,11 @@
 #elif __linux__
 
 #include <dirent.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #else
-#error "Use a better operating system, loser"
+#error Use a better operating system, loser
 #endif
 
 #define COLORS

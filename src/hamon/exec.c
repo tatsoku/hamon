@@ -11,10 +11,11 @@
 
 #elif _WIN32
 
+#include "headers/error.h"
 #include <windows.h>
 
-#include "headers/error.h"
-
+#else
+#error Get a better operating system, loser
 #endif
 
 #define COLORS

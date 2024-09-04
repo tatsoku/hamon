@@ -2,16 +2,23 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __linux__
+
 #include <string.h>
+
+#elif _WIN32
+
+#include <bsd/string.h>
+#include <windows.h>
+
+#include "headers/error.h"
+
+#endif
 
 #include "headers/config.h"
 #include "headers/escape.h"
 #include "headers/file.h"
-
-#ifdef _WIN32
-#include "headers/error.h"
-#include "windows.h"
-#endif
 
 /*
  * Default configuration:
