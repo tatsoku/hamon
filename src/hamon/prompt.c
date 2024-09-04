@@ -89,7 +89,7 @@ LPCH *get_env() {
   var = env_block;
   for (int i = 0; i < count; i++) {
     env_array[i] = var;
-    var += wcslen(var) + 1;
+    var += wcslen((WCHAR)var) + 1;
   }
   env_array[count] = NULL;
   return env_array;
@@ -127,7 +127,6 @@ int init_prompt(void) {
 #elif _WIN32
   LPCH *envp = get_env();
 #endif
-
   int argc = 0;
   int env_count = 0;
 
@@ -135,11 +134,9 @@ int init_prompt(void) {
     env[env_count++] = (char *)*envp;
     envp++;
   }
-
 #ifdef _WIN32
   free(envp);
 #endif
-
   for (;;) {
     printf("%s%s ", VERTICAL_CURSOR, prompt);
     if (fgets(input_buf, 4096, stdin) == 0) {
