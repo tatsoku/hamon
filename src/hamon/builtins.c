@@ -163,7 +163,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 
   strlcpy(last_dir, cwd_buf, 1024);
 #elif _WIN32
-  LPWCHAR cwd_buf[MAX_PATH] = {0};
+  WCHAR cwd_buf[MAX_PATH] = {0};
 
   GetCurrentDirectoryW(MAX_PATH, cwd_buf);
   strlcpy(last_dir, cwd_buf, MAX_PATH);

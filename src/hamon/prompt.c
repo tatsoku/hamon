@@ -125,7 +125,7 @@ int init_prompt(void) {
 #ifdef __linux__
   char **envp = __environ;
 #elif _WIN32
-  LPWCHAR *envp = get_env();
+  WCHAR *envp = get_env();
 #endif
 
   int status = 0;
