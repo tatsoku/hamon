@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -48,7 +47,7 @@ BOOL FindExecutableInPath(LPCSTR executable, LPCSTR *path_found) {
 
 #endif
 
-int execute(char *executable, char **argv, int status) {
+int execute(char *executable, char *argv[], int status, char *const *envp) {
 
 #ifdef __linux__
   pid_t pid = fork();
@@ -56,17 +55,16 @@ int execute(char *executable, char **argv, int status) {
   if (pid < 0) {
     perror("failed to fork");
   } else if (pid == 0) {
-    if (execvp(executable, argv) == -1) {
+    if (execve(executable, argv, envp) == -1) {
       if (errno == ENOENT) {
         fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
         exit(-1);
       }
 
       perror("Failed to exec to childprocess. (execvp)");
-      exit(-1);
+      return -1;
     } else {
-      argv = 0;
-      exit(0);
+      return 0;
     }
   } else {
     wait(&status);

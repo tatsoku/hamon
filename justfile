@@ -10,8 +10,8 @@ default:
 @link name="hsh":
   scripts/build.sh -l {{name}}
 
-@test:
-  scripts/build.sh -t
+@test extra_arg1="" extra_arg2 ="":
+  scripts/build.sh -t {{extra_arg1}} {{extra_arg2}}
 
 @setup-testing:
   scripts/build.sh -st

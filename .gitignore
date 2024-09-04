@@ -2,4 +2,5 @@
 /out/
 /hsh
 /hamon
-/test/unity/
+/tests/unity
+/vgcore

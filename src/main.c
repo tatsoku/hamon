@@ -5,6 +5,7 @@
 #define GRAPHICS
 
 #include "hamon/headers/cli.h"
+#include "hamon/headers/config.h"
 #include "hamon/headers/escape.h"
 #include "hamon/headers/meta.h"
 #include "hamon/headers/prompt.h"
@@ -41,7 +42,7 @@ int main(int argc, char *argv[]) {
   if (argc > 1) {
     return process_args(argc, argv);
   }
-  // gen_default_config();
+  gen_default_config();
 
   // init_shell();
   return init_prompt();

@@ -8,6 +8,11 @@
 #include "headers/escape.h"
 #include "headers/file.h"
 
+#ifdef _WIN32
+#include "headers/error.h"
+#include "windows.h"
+#endif
+
 /*
  * Default configuration:
  * ▄▄                                                ▄▄
@@ -131,6 +136,7 @@ const char *default_config =
     "hostname_icon     = \"󰌢\"\n"
     "username_icon     = \"\"\n"
     "cd_icon           = \"\"\n\n"
+
     "# git branch statuses.\n"
     "git_tree          = [ \"󰘬\", \"󱓏\", \"󱓋\", \"󱓊\", \"󱓍\", "
     "\"󱓌\", \"󱓎\" ]\n"
@@ -141,56 +147,76 @@ const char *default_config =
  */
 
 int gen_default_config(void) {
-  size_t env_size = 0;
-  size_t folder_buffer_size = 0;
-  char *folder_buffer = {0};
-
   size_t config_buffer_size = strlen(default_config);
   char *config_buffer = {0};
 
   config_buffer = (char *)malloc(config_buffer_size);
   if (!config_buffer) {
     perror("malloc");
-    return 1;
+    return -1;
   }
 
-  strlcpy(config_buffer, default_config, config_buffer_size);
+  size_t length = strlcpy(config_buffer, default_config, config_buffer_size);
+  if (length > sizeof(config_buffer_size)) {
+    free(config_buffer);
+    return -1;
+  }
 
 #ifdef _WIN32
-  env_size = strlen(getenv("APPDATA"));
-  folder_buffer_size = strlen("\\hamon\\") + env_size + 1;
-  folder_buffer = (char *)malloc(folder_buffer_size);
-  snprintf(folder_buffer, folder_buffer_size, "%s\\hamon\\", getenv("APPDATA"));
+  char folder_buffer[MAX_PATH] = {0};
+  char absolute_path_buffer[MAX_PATH] = {0};
+
+  int res1 =
+      snprintf(folder_buffer, MAX_PATH, "%s\\hamon\\", getenv("APPDATA"));
+  if (res1 < 0 || res1 >= MAX_PATH) {
+    win_perror("snprintf");
+    return -1;
+  }
+
+  int res2 =
+      snprintf(absolute_path_buffer, MAX_PATH, "%sconfig.toml", folder_buffer);
+  if (res2 < 0 || res2 >= 1024) {
+    win_perror("snprintf");
+    return -1;
+  }
 #endif
 
 #ifdef __linux__
-  env_size = strlen(getenv("HOME"));
-  folder_buffer_size = strlen("/.config/hamon/") + env_size + 1;
-  folder_buffer = (char *)malloc(folder_buffer_size);
-  snprintf(folder_buffer, folder_buffer_size, "%s/.config/hamon/",
-           getenv("HOME"));
-#else
-#error "Use a better operating system, loser"
-#endif
+  char folder_buffer[1024] = {0};
+  char absolute_path_buffer[1024] = {0};
 
+  int res1 = snprintf(folder_buffer, 1024, "%s/.config/hamon/", getenv("HOME"));
+  if (res1 < 0 || res1 >= 1024) {
+    perror("snprintf");
+    return -1;
+  }
+
+  int res2 =
+      snprintf(absolute_path_buffer, 1024, "%sconfig.toml", folder_buffer);
+  if (res2 < 0 || res2 >= 1024) {
+    perror("snprintf");
+    return -1;
+  }
+#else
+#error "Use a better operating system, loser
+#endif
   if (!check_if_folder_exists(folder_buffer)) {
     if (!create_folder(folder_buffer)) {
       fprintf(stderr, RED "!%s Failed to create config directory, exiting..\n",
               CLEAR);
-      free(folder_buffer);
-      return 1;
+      return -1;
     }
   }
 
-  size_t absolute_path_buffer_size = folder_buffer_size + strlen("config.toml");
-  char *absolute_path_buffer = (char *)malloc(absolute_path_buffer_size);
-  snprintf(absolute_path_buffer, absolute_path_buffer_size, "%sconfig.toml",
-           folder_buffer);
+  if (read_file(absolute_path_buffer)) {
+    int status =
+        write_file(absolute_path_buffer, config_buffer, config_buffer_size);
 
-  int status =
-      write_file(absolute_path_buffer, config_buffer, config_buffer_size);
+    if (!status) {
+      free(config_buffer);
+      return -1;
+    }
+  }
   free(config_buffer);
-  free(folder_buffer);
-  free(absolute_path_buffer);
-  return 0;
+  return 1;
 }

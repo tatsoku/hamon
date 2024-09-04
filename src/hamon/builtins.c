@@ -72,7 +72,7 @@ int print_builtin_help(enum BuiltinType builtin) {
     break;
   case Help:
     printf(
-        "help: shows all builtin commands you can run in this shell.\n\n"
+        "help: show builtin commands\n\n"
 
         "help: USAGE\n"
         "help [flags]\n\n"
@@ -87,7 +87,7 @@ int print_builtin_help(enum BuiltinType builtin) {
   return 1;
 }
 
-int builtin_echo(int argc, char *argv[]) {
+int builtin_echo(int argc, char *argv[], char *const *envp) {
   if (argc > 3 || argc < 2)
     return print_builtin_help(Echo);
 
@@ -117,7 +117,7 @@ int builtin_echo(int argc, char *argv[]) {
   return 0;
 }
 
-int builtin_exit(int argc, char *argv[]) {
+int builtin_exit(int argc, char *argv[], char *const *envp) {
   int code = 0;
 
   if (argc > 1) {
@@ -136,7 +136,7 @@ char last_dir[MAX_PATH] = {0};
 #error "Get a better operating system, loser"
 #endif
 
-int builtin_cd(int argc, char *argv[]) {
+int builtin_cd(int argc, char *argv[], char *const *envp) {
   if (argc > 2 || argc < 2)
     return print_builtin_help(Cd);
 
@@ -148,6 +148,7 @@ int builtin_cd(int argc, char *argv[]) {
   char *cwd_ptr = {0};
 
   cwd_ptr = getcwd(cwd_buf, 1024);
+  printf("cwd_ptr: %s\n", cwd_ptr);
 
   if (strncmp(path, "~", 1) == 0) {
     strlcpy(path, getenv("HOME"), 1024);
@@ -183,7 +184,7 @@ int builtin_cd(int argc, char *argv[]) {
   return 0;
 }
 
-int builtin_pwd(int argc, char *argv[]) {
+int builtin_pwd(int argc, char *argv[], char *const *envp) {
   if (argc > 1)
     return print_builtin_help(Pwd);
 
@@ -213,14 +214,14 @@ int builtin_pwd(int argc, char *argv[]) {
   return 0;
 }
 
-int builtin_test(int argc, char *argv[]) {
+int builtin_test(int argc, char *argv[], char *const *envp) {
   for (int i = 0; i != argc; i++) {
     printf("%d: %s\n", i, argv[i]);
   }
   return 0;
 }
 
-int builtin_help(int argc, char *argv[]) {
+int builtin_help(int argc, char *argv[], char *const *envp) {
   if (argc > 2)
     return print_builtin_help(Help);
 
@@ -236,16 +237,16 @@ int builtin_help(int argc, char *argv[]) {
   return 0;
 }
 
-int check_builtins(int argc, char *argv[]) {
+int check_builtins(int argc, char *argv[], char *const *envp) {
   const char *builtin_strs[] = {"cd", "pwd", "help", "echo", "exit", "test"};
-  int (*builtin_funcs[])(int argc, char *argv[]) = {
+  int (*builtin_funcs[])(int argc, char *argv[], char *const *envp) = {
       &builtin_cd,   &builtin_pwd,  &builtin_help,
       &builtin_echo, &builtin_exit, builtin_test};
   int num_builtins = sizeof(builtin_strs) / sizeof(char *);
 
   for (int builtin_index = 0; builtin_index < num_builtins; builtin_index++) {
     if (strncmp(builtin_strs[builtin_index], argv[0], 4) == 0) {
-      return builtin_funcs[builtin_index](argc, argv);
+      return builtin_funcs[builtin_index](argc, argv, envp);
     }
   }
 

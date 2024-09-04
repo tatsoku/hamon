@@ -24,7 +24,7 @@
 #include "headers/prompt.h"
 
 char *get_hostname() {
-  char *hostname = 0;
+  char *hostname = {0};
 #ifdef __linux__
   size_t hostname_len = 512;
   hostname = (char *)malloc(hostname_len + 1);
@@ -51,7 +51,7 @@ char *get_hostname() {
   return hostname;
 }
 
-char *get_username() {
+char *get_username(void) {
   char *username = 0;
 #ifdef __linux__
   size_t username_len = 512;
@@ -77,6 +77,11 @@ char *get_username() {
 
 // char *assemble_prompt() { return ">"; }
 
+bool is_env_format(const char *str) {
+  const char *equals = strchr(str, '=');
+  return equals != 0 && equals != str && *(equals + 1) != '\0';
+}
+
 void tokenize(char *input, char **tokens_buffer, char **save_ptr) {
   int token_index = 0;
   char *token = strtok_r(input, " \n", save_ptr);
@@ -88,13 +93,22 @@ void tokenize(char *input, char **tokens_buffer, char **save_ptr) {
   tokens_buffer[token_index] = 0;
 }
 
-int init_prompt() {
+int init_prompt(void) {
   char *prompt = "hsh >";
   char input_buf[4096] = {0};
   char *argv[4096] = {0};
   char *save_ptr = {0};
   int status = 0;
   int argc = 0;
+  char *env[1024] = {0};
+  int env_count = 0;
+  char **envp = __environ;
+  char executable[128] = {0};
+
+  while (*envp) {
+    env[env_count++] = *envp;
+    envp++;
+  }
 
   for (;;) {
     printf("%s%s ", VERTICAL_CURSOR, prompt);
@@ -112,8 +126,18 @@ int init_prompt() {
     while (argv[argc] != 0)
       argc++;
 
-    if (check_builtins(argc, argv) == -1) {
-      if (execute(argv[0], argv, status) == -1)
+    for (int argi = 0; argi != argc; argi++) {
+      if (is_env_format(argv[argi])) {
+        printf("User specified env variable: %s\n", argv[argi]);
+        env[env_count++] = argv[argi];
+      } else {
+        strlcpy(executable, argv[argi], 128);
+        break;
+      }
+    }
+
+    if (check_builtins(argc, argv, env) == -1) {
+      if (execute(executable, argv, status, env) == -1)
         continue;
     }
 

@@ -50,9 +50,9 @@ OUT="$(pwd)/out"
 BIN="$(pwd)/bin"
 DIR="${SRC}/hamon"
 
-TEST="$(pwd)/test"
-TEST_OUT="${TEST}/out"
-TEST_BIN="${TEST}/bin"
+TESTS="$(pwd)/tests"
+TESTS_OUT="${TESTS}/out"
+TESTS_BIN="${TESTS}/bin"
 
 #INCLUDE="$(pwd)/include"
 COLOR=true
@@ -69,14 +69,12 @@ if ${COLOR}; then
 	CLEAR="${ESCAPE}[0m"
 fi
 
-if [[ ${3} == "--debug" ]]; then
-	DEBUG=true
-else
-	DEBUG=false
-fi
+CFLAGS="-O3 -Wall -Wextra"
+LINKER_FLAGS="-fuse-ld=mold -Wall -Wextra"
 
-CFLAGS="-O3"
-#LINKER_FLAGS=""
+if [[ ${2} == "--debug" ]]; then
+	CFLAGS+=" -ggdb"
+fi
 
 if [[ ! -d ${OUT} ]]; then
 	mkdir "${OUT}"
@@ -99,19 +97,19 @@ print_help() {
 ${RED}${__NAME__}${CLEAR} v${GREEN}${__VERSION__}${CLEAR}
 Licensed under: ${CYAN}${__LICENSE__}${CLEAR}
 
-USAGE: ${GREEN}${0}${CLEAR} ${RED}{FLAGS} ${BLUE}{EXECUTABLE_NAME}${CLEAR}
+USAGE: ${GREEN}${0}${CLEAR} ${RED}[FLAGS] ${BLUE}[EXECUTABLE_NAME]${CLEAR}
 ${RED}-c${CLEAR} | ${RED}--compile${CLEAR}
 Compiles ${CYAN}${SRC}/main.c${CLEAR} & all files in ${CYAN}${DIR}/${CLEAR}.
 
 ${RED}-l${CLEAR} | ${RED}--link${CLEAR}
-Links all the files in ${CYAN}${OUT}/${CLEAR} to an executable with ${BLUE}{EXECUTABLE_NA}ME}${CLEAR}
+Links all the files in ${CYAN}${OUT}/${CLEAR} to an executable with ${BLUE}[EXECUTABLE_NAME]${CLEAR}
 
 ${RED}-st${CLEAR} | ${RED}--setup-testing${CLEAR}
 Sets up and installs unity in the correct path.
 (Automatically runs if not already installed during --test)
 
-${RED}-t${CLEAR} | ${RED}--test${CLEAR}
-Runs unit tests in ${TEST}
+${RED}-t${CLEAR} | ${RED}--test${CLEAR} [TEST_FILE]
+Runs unit tests in ${TESTS}, you can also specify a ${BLUE}[TEST_FILE]${CLEAR}
 
 ${RED}-d${CLEAR} | ${RED}--delete${CLEAR} | ${RED}--clean${CLEAR}
 Cleans all files in ${CYAN}${BIN}/${CLEAR} & ${CYAN}${OUT}/${CLEAR}
@@ -142,30 +140,26 @@ compile() {
 		TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
 		TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
 		TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
-		echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}.."
+		echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}"
 		if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
 			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 			read -r RECOMPILE
 			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
-				if ${DEBUG}; then
-					"${CC}" ${CFLAGS} -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-				else
-					"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-				fi
-			fi
-		else
-			if ${DEBUG}; then
-				"${CC}" ${CFLAGS} -ggdb -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
-			else
+				# shellcheck disable=SC2086
 				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			fi
+		else
+			# shellcheck disable=SC2086
+			"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 		fi
 	done
 
-	echo -e "${BLUE}>${CLEAR} Compiling: main.c.."
+	echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${SRC}/main.c${CLEAR}"
+	# shellcheck disable=SC2086
 	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
 
-	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main${CLEAR} successfully"
+	for i in "${!TRIMMED_C_FILENAMES[@]}"; do TRIMMED_C_FILENAMES[i]="${TRIMMED_C_FILENAMES[i]}.c"; done
+	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main.c${CLEAR} successfully"
 }
 
 # links all object files in out/ to an executable in /bin
@@ -189,37 +183,37 @@ link() {
 
 	mapfile -t OBJECTS < <(find "${OUT}" -type f -name "*.o")
 
-	TRIMMED_FILES="${OBJECTS[*]##*/}"
+	TRIMMED_FILES=("${OBJECTS[@]##*/}")
 	pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
-	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}.."
+	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}"
 
 	if [[ -f "${BIN}/${EXECUTABLE_NAME}" ]]; then
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
 			# shellcheck disable=SC2086,SC2048
-			"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
-			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
+			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
 		fi
 	else
 		# shellcheck disable=SC2086,SC2048
-		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
-		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES}${CLEAR} successfully"
+		"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
+		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
 	fi
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 }
 
 setup_unity() {
-	mkdir "${TEST}/unity"
+	mkdir "${TESTS}/unity"
 	mkdir temp_dir
 
 	pushd temp_dir >/dev/null || handle_failure "Failed to pushd"
 	git clone https://github.com/ThrowTheSwitch/Unity
 
-	rm Unity/src/meson.build
-	mv Unity/src/* "${TEST}/unity"
+	rm Unity/src/meson.buildhttps://crackboard.dev/
+	mv Unity/src/* "${TESTS}/unity"
 
 	popd >/dev/null || handle_failure "Failed to popd"
 
@@ -227,96 +221,114 @@ setup_unity() {
 }
 
 unit_test() {
-	local -a TESTS
+	local -a TEST_FILES
 	local TEST_FILE
 	local TRIMMED_TEST_FILE
 	local TRIMMED_TEST_FILENAME
-
-	local -a TESTOBJS
-	local TEST_OBJ_FILE
-	local TRIMMED_TEST_OBJ_FILE
-	local TRIMMED_TEST_OBJ_FILENAME
 
 	local -a TESTBINS
 	local TEST_BINARY
 	local TRIMMED_BINARY
 	local TRIMMED_BINARY_NAME
 
-	if [[ ! -d ${TEST}/unity ]]; then
+	local -a DEPS
+	local -a DEPS_O
+	local -a DEPS_C
+	local -a DEPS_PATHS
+
+	if [[ ! -d ${TESTS}/unity ]]; then
 		setup_unity
 	fi
 
-	if [[ ! -d ${TEST_OUT} ]]; then
-		mkdir "${TEST_OUT}"
+	if [[ ! -d ${TESTS_OUT} ]]; then
+		mkdir "${TESTS_OUT}"
 	fi
 
-	if [[ ! -d ${TEST_OUT}/unity ]]; then
-		mkdir "${TEST_OUT}/unity"
+	if [[ ! -d ${TESTS_OUT}/unity ]]; then
+		mkdir "${TESTS_OUT}/unity"
 	fi
 
-	if [[ ! -d ${TEST_OUT}/deps ]]; then
-		mkdir "${TEST_OUT}/deps"
+	if [[ ! -d ${TESTS_OUT}/deps ]]; then
+		mkdir "${TESTS_OUT}/deps"
 	fi
 
-	if [[ ! -d ${TEST_BIN} ]]; then
-		mkdir "${TEST_BIN}"
+	if [[ ! -d ${TESTS_BIN} ]]; then
+		mkdir "${TESTS_BIN}"
 	fi
 
-	mapfile -t TESTS < <(find "${TEST}" -maxdepth 1 -type f -name "*.c")
+	mapfile -t TEST_FILES < <(find "${TESTS}" -maxdepth 1 -type f -name "*.c")
 
-	pushd "${TEST}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+	if [[ -n "${1}" ]]; then
+		mapfile -t TEST_FILES < <(find "${TESTS}" -maxdepth 1 -type f -name "${1}.c")
+	fi
 
-	echo -e "${BLUE}>${CLEAR} Building ${CYAN}unity.c${CLEAR}"
-	"${CC}" ${CFLAGS} -c "${TEST}/unity/unity.c" -o "${TEST_OUT}/unity/unity.o"
-	echo -e "${GREEN}✓${CLEAR} Successfully built ${CYAN}unity.c${CLEAR}"
+	pushd "${TESTS}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
-	for TEST_FILE in "${TESTS[@]}"; do
+	echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}unity.c${CLEAR}"
+	# shellcheck disable=SC2086
+	"${CC}" ${CFLAGS} -c "${TESTS}/unity/unity.c" -o "${TESTS_OUT}/unity/unity.o"
+	echo -e "${GREEN}✓${CLEAR} Successfully compiled ${CYAN}unity.c${CLEAR}"
+
+	for TEST_FILE in "${TEST_FILES[@]}"; do
 		if [[ -s "${TEST_FILE}" ]]; then
 			TRIMMED_TEST_FILE="${TEST_FILE%.*}"
 			TRIMMED_TEST_FILENAME="${TRIMMED_TEST_FILE##*/}"
 
-			echo -e "${BLUE}>${CLEAR} Building ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR} & ${CYAN}${TRIMMED_TEST_FILENAME:5}.c${CLEAR}"
-			"${CC}" ${CFLAGS} -c "${TRIMMED_TEST_FILENAME}.c" -o "${TEST_OUT}/${TRIMMED_TEST_FILENAME}.o"
-			"${CC}" ${CFLAGS} -c "${DIR}/${TRIMMED_TEST_FILENAME:5}.c" -o "${TEST_OUT}/deps/${TRIMMED_TEST_FILENAME:5}.o"
-			echo -e "${GREEN}✓${CLEAR} Successfully built ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR} & ${CYAN}${TRIMMED_TEST_FILENAME:5}${CLEAR}"
+			eval "$(sed -n '1s/^\/\/[[:space:]]*//p' "${TEST_FILE}")"
+			echo -e "\n\n\nevaluated: ${DEPS[*]}\n\n\n"
+
+			for i in "${!DEPS[@]}"; do
+				DEPS_C[i]="${DEPS[i]}.c"
+				DEPS_O[i]="${DEPS[i]}.o"
+				DEPS_PATHS[i]="${TESTS_OUT}/deps/${DEPS[i]}.o"
+
+				echo -e "${BLUE}>${CLEAR} Compiling dependency: ${CYAN}${DEPS[i]}.c${CLEAR}"
+				# shellcheck disable=SC2086
+				"${CC}" ${CFLAGS} -c "${DIR}/${DEPS_C[i]}" -o "${DEPS_PATHS[i]}"
+			done
+
+			echo -e "${GREEN}✓${CLEAR} Successfully compiled dependencies: ${CYAN}${DEPS_C[*]}${CLEAR}"
+
+			echo -e "${BLUE}>${CLEAR} Compiling test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
+			# shellcheck disable=SC2086
+			"${CC}" ${CFLAGS} -c "./${TRIMMED_TEST_FILENAME}.c" -o "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
+			echo -e "${GREEN}✓${CLEAR} Successfully compiled test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
+
+			pushd "${TESTS_OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+
+			echo "${DEPS_O[*]}"
+			echo "${DEPS_PATHS[*]}"
+
+			echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_FILENAME}.o unity.o ${DEPS_O[*]}${CLEAR} to test: ${GREEN}${TRIMMED_TEST_FILENAME}${CLEAR}"
+			# shellcheck disable=SC2086,SC2048
+			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${TESTS_BIN}/${TRIMMED_TEST_FILENAME}" "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o" ${DEPS_PATHS[*]} "${TESTS_OUT}/unity/unity.o"
+			echo -e "${GREEN}✓${CLEAR} Successfully linked ${CYAN}${TRIMMED_TEST_FILENAME}.o unity.o ${DEPS_O[*]}${CLEAR} to test: ${GREEN}${TRIMMED_TEST_FILENAME}${CLEAR}"
+			popd >/dev/null || handle_failure "Failed to popd"
+
+			unset DEPS DEPS_C DEPS_O DEPS_PATHS
 		fi
 	done
 
-	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
+	mapfile -t TESTBINS < <(find "${TESTS_BIN}" -maxdepth 1 -type f)
 
-	mapfile -t TESTOBJS < <(find "${TEST_OUT}" -maxdepth 1 -type f -name "*.o")
-
-	echo "${TESTOBJS[@]}"
-
-	pushd "${TEST_OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
-
-	for TEST_OBJ_FILE in "${TESTOBJS[@]}"; do
-		TRIMMED_TEST_OBJ_FILE="${TEST_OBJ_FILE%.*}"
-		TRIMMED_TEST_OBJ_FILENAME="${TRIMMED_TEST_OBJ_FILE##*/}"
-
-		echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_OBJ_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
-		# shellcheck disable=SC2086,SC2048
-		"${CC}" -fuse-ld=mold ${CFLAGS} ${LINKER_FLAGS} -o "${TEST_BIN}/${TRIMMED_TEST_OBJ_FILENAME}" "${TRIMMED_TEST_OBJ_FILENAME}.o" "./deps/${TRIMMED_TEST_OBJ_FILENAME:5}.o" "${TEST_OUT}/unity/unity.o"
-		echo -e "${GREEN}✓${CLEAR} Successfully linked ${CYAN}${TRIMMED_TEST_OBJ_FILENAME}.o${CLEAR} & ${CYAN}unity.o${CLEAR} to ${TRIMMED_TEST_OBJ_FILENAME}"
-	done
-
-	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
-
-	mapfile -t TESTBINS < <(find "${TEST_OUT}" -maxdepth 1 -type f)
-
-	pushd "${TEST_BIN}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
+	pushd "${TESTS_BIN}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
 	for TEST_BINARY in "${TESTBINS[@]}"; do
 		TRIMMED_BINARY="${TEST_BINARY%.*}"
 		TRIMMED_BINARY_NAME="${TRIMMED_BINARY##*/}"
 
 		echo -e "${BLUE}>${CLEAR} Running test: ${CYAN}${TRIMMED_BINARY_NAME}${CLEAR}"
-		"./${TRIMMED_BINARY_NAME}"
+
+		if [[ -n "${2}" && "${2}" == "--debug" ]]; then
+			valgrind "./${TRIMMED_BINARY_NAME}"
+		else
+			"./${TRIMMED_BINARY_NAME}"
+		fi
 	done
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 
-	rm -fr "${TEST_OUT}" "${TEST_BIN}"
+	rm -fr "${TESTS_OUT}" "${TESTS_BIN}"
 }
 
 # removes dangling object files that shouldn't be there, used to be required, not that much as of lately though.
@@ -412,7 +424,7 @@ case $1 in
 	setup_unity
 	;;
 "-t" | "--test")
-	unit_test
+	unit_test "${2}" "${3}"
 	;;
 "-d" | "--delete" | "--clean")
 	clean "${OUT}" "${BIN}" "n"
