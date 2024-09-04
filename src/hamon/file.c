@@ -176,9 +176,9 @@ int remove_folder(const char *path) {
       else
         DeleteFileW((LPCWSTR)full_path);
     }
-  } while (FindNextFile(hFind, &findFileData))
+  } while (FindNextFile(hFind, &findFileData));
 
-      FindClose(hFind);
+  FindClose(hFind);
 #else
 #error Use a real operating system, loser
 #endif

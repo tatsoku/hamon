@@ -5,14 +5,17 @@
 
 #include <errno.h>
 #include <linux/fcntl.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
 #elif _WIN32
 
-#include "headers/error.h"
+#include <bsd/string.h>
 #include <windows.h>
+
+#include "headers/error.h"
 
 #else
 #error Get a better operating system, loser
@@ -50,23 +53,58 @@ BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
 }
 #endif
 
+char *get_exec_path(const char *name, char *const *envp) {
+  char path[4096] = {0};
+
+  while (*envp) {
+    if (strncmp(*envp, "PATH", 4) == 0) {
+      strlcpy(path, *envp, 4096);
+      break;
+    }
+  }
+
+  char *full_path = (char *)malloc(1024);
+  char *token = 0;
+
+  token = strtok(path, ":");
+  while (token != 0) {
+    snprintf(full_path, 1024, "%s/%s", token, name);
+
+    if (access(full_path, X_OK) == 0) {
+      return full_path;
+    }
+    token = strtok(0, ":");
+  }
+}
+
 int execute(char *executable, char *argv[], char *const *envp) {
 #ifdef __linux__
   pid_t pid = fork();
   int status = 0;
+  char *path = 0;
+
+  if (access(executable, X_OK) == 0) {
+    path = executable;
+  } else {
+    path = get_exec_path(executable, envp);
+  }
 
   if (pid < 0) {
     perror("failed to fork");
   } else if (pid == 0) {
-    if (execve(executable, argv, envp) == -1) {
+    if (execve(path, argv, envp) != 0) {
       if (errno == ENOENT) {
         fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
+        printf("%s\n", path);
+        path = 0;
+        free(path);
         exit(-1);
       }
 
       perror("Failed to exec to childprocess. (execvp)");
       return -1;
     } else {
+      free(path);
       return 0;
     }
   } else {
@@ -108,5 +146,6 @@ int execute(char *executable, char *argv[], char *const *envp) {
   }
 
 #endif
+  free(path);
   return 0;
 }

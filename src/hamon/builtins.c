@@ -222,6 +222,13 @@ int builtin_test(int argc, char *argv[], char *const *envp) {
   for (int i = 0; i != argc; i++) {
     printf("%d: %s\n", i, argv[i]);
   }
+
+  while (*envp) {
+    if (strncmp(*envp, "PATH", 4) == 0) {
+      puts(*envp);
+    }
+    envp++;
+  }
   return 0;
 }
 

@@ -75,27 +75,6 @@ char *get_username(void) {
   return username;
 }
 
-#ifdef _WIN32
-LPCH *get_env() {
-  LPCH env_block = GetEnvironmentStrings();
-  int count = 0;
-  LPCH var = env_block;
-  while (*var) {
-    count++;
-    var++;
-  }
-  FreeEnvironmentStrings(env_block);
-  LPCH *env_array = (LPCH *)malloc((count + 1) * sizeof(LPCH));
-  var = env_block;
-  for (int i = 0; i < count; i++) {
-    env_array[i] = var;
-    var += wcslen((WCHAR)var) + 1;
-  }
-  env_array[count] = NULL;
-  return env_array;
-}
-#endif
-
 // char *assemble_prompt() { return ">"; }
 
 bool is_env_format(const char *str) {
@@ -125,10 +104,11 @@ int init_prompt(void) {
 #ifdef __linux__
   char **envp = __environ;
 #elif _WIN32
-  LPCH *envp = get_env();
+  char **envp = _dupenv_s(NULL, NULL, 0);
 #endif
   int argc = 0;
   int env_count = 0;
+  int non_env_arg_index = 0;
 
   while (*envp) {
     env[env_count++] = (char *)*envp;
@@ -157,11 +137,17 @@ int init_prompt(void) {
       if (is_env_format(argv[argi])) {
         printf("User specified env variable: %s\n", argv[argi]);
         env[env_count++] = argv[argi];
-      } else {
-        strlcpy(executable, argv[argi], 128);
-        break;
       }
     }
+
+    for (int argi = 0; argi < argc && non_env_arg_index < argc; argi++) {
+      if (!is_env_format(argv[argi])) {
+        argv[non_env_arg_index++] = argv[argi];
+      }
+    }
+
+    argc = non_env_arg_index;
+    strlcpy(executable, argv[argc - 1], 128);
 
     if (check_builtins(argc, argv, env) == -1) {
       if (execute(executable, argv, env) == -1)
