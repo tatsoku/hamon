@@ -131,7 +131,7 @@ int builtin_exit(int argc, char *argv[], char *const *envp) {
 #ifdef __linux__
 char last_dir[1024] = {0};
 #elif _WIN32
-WCHAR last_dir[MAX_PATH] = {0};
+LPTSTR last_dir[MAX_PATH] = {0};
 #else
 #error "Get a better operating system, loser"
 #endif
@@ -163,9 +163,9 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 
   strlcpy(last_dir, cwd_buf, 1024);
 #elif _WIN32
-  WCHAR cwd_buf[MAX_PATH] = {0};
+  LPTSTR cwd_buf[MAX_PATH] = {0};
 
-  GetCurrentDirectoryW(MAX_PATH, cwd_buf);
+  GetCurrentDirectory(MAX_PATH, cwd_buf);
   strlcpy(last_dir, cwd_buf, MAX_PATH);
 
   if (strncmp(path, "~", 1) == 0) {
@@ -198,7 +198,7 @@ int builtin_pwd(int argc, char *argv[], char *const *envp) {
     return 1;
   }
 #elif _WIN32
-  WCHAR cwd_buf[MAX_PATH];
+  LPTSTR cwd_buf[MAX_PATH];
   DWORD len = GetCurrentDirectoryW(MAX_PATH, cwd_buf);
 
   if (len > 0 && len <= MAX_PATH) {

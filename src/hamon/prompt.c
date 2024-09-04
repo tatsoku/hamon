@@ -77,15 +77,15 @@ char *get_username(void) {
 
 #ifdef _WIN32
 LPCH *get_env() {
-  LPCH *env_block = GetEnvironmentStrings();
+  LPCH env_block = GetEnvironmentStrings();
   int count = 0;
-  LPCH *var = env_block;
+  LPCH var = env_block;
   while (*var) {
     count++;
     var++;
   }
   FreeEnvironmentStrings(env_block);
-  LPCH *env_array = (LPCH *)malloc((count + 1) * sizeof(LPWCHAR));
+  LPCH *env_array = (LPCH *)malloc((count + 1) * sizeof(LPCH));
   var = env_block;
   for (int i = 0; i < count; i++) {
     env_array[i] = var;
@@ -128,7 +128,6 @@ int init_prompt(void) {
   LPCH *envp = get_env();
 #endif
 
-  int status = 0;
   int argc = 0;
   int env_count = 0;
 
@@ -168,7 +167,7 @@ int init_prompt(void) {
     }
 
     if (check_builtins(argc, argv, env) == -1) {
-      if (execute(executable, argv, status, env) == -1)
+      if (execute(executable, argv, env) == -1)
         continue;
     }
 

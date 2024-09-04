@@ -49,9 +49,10 @@ BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
 }
 #endif
 
-int execute(char *executable, char *argv[], int status, char *const *envp) {
+int execute(char *executable, char *argv[], char *const *envp) {
 #ifdef __linux__
   pid_t pid = fork();
+  int status = 0;
 
   if (pid < 0) {
     perror("failed to fork");
