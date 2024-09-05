@@ -25,9 +25,19 @@ jobs:
           install: libbsd
       - name: Install just
         uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
-      - name: Test build
+      - name: Test build on windows
+        if: matrix.os == 'windows-latest'
+        shell: ${{ matrix.sys }}
+        run: just build
+      - name: Test build on ubuntu
+        if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: just build
-      - name: Run unit-tests
+      - name: Run unit-tests on windows
+        if: matrix.os == 'windows-latest'
+        shell: ${{ matrix-sys }}
+        run: just test
+      - name: Run unit-tests on ubuntu
+        if: matrix.os == 'ubuntu-24.04'
         shell: bash
         run: just test
