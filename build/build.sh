@@ -284,8 +284,6 @@ unit_test() {
 		mapfile -t TEST_FILES < <(find "${TESTS}" -maxdepth 1 -type f -name "${1}.c")
 	fi
 
-	pushd "${TESTS}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
-
 	echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}unity.c${CLEAR}"
 	echo -e "Running: ${CC} ${CFLAGS} -c ${TESTS}/unity/unity.c -o ${TESTS_OUT}/unity/unity.o"
 	# shellcheck disable=SC2086
@@ -298,7 +296,6 @@ unit_test() {
 			TRIMMED_TEST_FILENAME="${TRIMMED_TEST_FILE##*/}"
 
 			eval "$(sed -n '1s/^\/\/[[:space:]]*//p' "${TEST_FILE}")"
-			echo -e "\n\n\nevaluated: ${DEPS[*]}\n\n\n"
 
 			for i in "${!DEPS[@]}"; do
 				DEPS_C[i]="${DEPS[i]}.c"
@@ -314,15 +311,12 @@ unit_test() {
 			echo -e "${GREEN}✓${CLEAR} Successfully compiled dependencies: ${CYAN}${DEPS_C[*]}${CLEAR}"
 
 			echo -e "${BLUE}>${CLEAR} Compiling test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
-			echo -e "Running: ${CC} ${CFLAGS} -c ./${TRIMMED_TEST_FILENAME}.c -o ${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
+			echo -e "Running: ${CC} ${CFLAGS} -c ${TESTS}/${TRIMMED_TEST_FILENAME}.c -o ${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
 			# shellcheck disable=SC2086
-			"${CC}" ${CFLAGS} -c "./${TRIMMED_TEST_FILENAME}.c" -o "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
+			"${CC}" ${CFLAGS} -c "${TESTS}/${TRIMMED_TEST_FILENAME}.c" -o "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
 			echo -e "${GREEN}✓${CLEAR} Successfully compiled test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
 
 			pushd "${TESTS_OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
-
-			echo "${DEPS_O[*]}"
-			echo "${DEPS_PATHS[*]}"
 
 			echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_FILENAME}.o unity.o ${DEPS_O[*]}${CLEAR} to test: ${GREEN}${TRIMMED_TEST_FILENAME}${CLEAR}"
 			echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${TESTS_BIN}/${TRIMMED_TEST_FILENAME} ${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o ${DEPS_PATHS[*]} ${TESTS_OUT}/unity/unity.o"
