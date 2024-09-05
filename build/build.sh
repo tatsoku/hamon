@@ -162,16 +162,19 @@ compile() {
 			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 			read -r RECOMPILE
 			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
+				echo -e "Running: ${CC} ${CFLAGS} -c ${C_FILES[${i}]} -o ${OUT}/${TRIMMED_C_FILENAME}.o"
 				# shellcheck disable=SC2086
 				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 			fi
 		else
+			echo -e "Running: ${CC} ${CFLAGS} -c ${C_FILES[${i}]} -o ${OUT}/${TRIMMED_C_FILENAME}.o"
 			# shellcheck disable=SC2086
 			"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
 		fi
 	done
 
 	echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${SRC}/main.c${CLEAR}"
+	echo -e "Running: ${CC} ${CFLAGS} -c ${SRC}/main.c -o ${OUT}/main.o"
 	# shellcheck disable=SC2086
 	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
 
@@ -209,11 +212,13 @@ link() {
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
+			echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_FILES[*]}"
 			# shellcheck disable=SC2086,SC2048
 			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
 		fi
 	else
+		echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_FILES[*]}"
 		# shellcheck disable=SC2086,SC2048
 		"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
 		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
@@ -282,6 +287,7 @@ unit_test() {
 	pushd "${TESTS}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
 	echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}unity.c${CLEAR}"
+	echo -e "Running: ${CC} ${CFLAGS} -c ${TESTS}/unity/unity.c -o ${TESTS_OUT}/unity/unity.o"
 	# shellcheck disable=SC2086
 	"${CC}" ${CFLAGS} -c "${TESTS}/unity/unity.c" -o "${TESTS_OUT}/unity/unity.o"
 	echo -e "${GREEN}✓${CLEAR} Successfully compiled ${CYAN}unity.c${CLEAR}"
@@ -300,6 +306,7 @@ unit_test() {
 				DEPS_PATHS[i]="${TESTS_OUT}/deps/${DEPS[i]}.o"
 
 				echo -e "${BLUE}>${CLEAR} Compiling dependency: ${CYAN}${DEPS[i]}.c${CLEAR}"
+				echo -e "Running: ${CC} ${CFLAGS} -c ${DIR}/${DEPS_C[i]} -o ${DEPS_PATHS[i]}"
 				# shellcheck disable=SC2086
 				"${CC}" ${CFLAGS} -c "${DIR}/${DEPS_C[i]}" -o "${DEPS_PATHS[i]}"
 			done
@@ -307,6 +314,7 @@ unit_test() {
 			echo -e "${GREEN}✓${CLEAR} Successfully compiled dependencies: ${CYAN}${DEPS_C[*]}${CLEAR}"
 
 			echo -e "${BLUE}>${CLEAR} Compiling test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
+			echo -e "Running: ${CC} ${CFLAGS} -c ./${TRIMMED_TEST_FILENAME}.c -o ${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
 			# shellcheck disable=SC2086
 			"${CC}" ${CFLAGS} -c "./${TRIMMED_TEST_FILENAME}.c" -o "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o"
 			echo -e "${GREEN}✓${CLEAR} Successfully compiled test: ${CYAN}${TRIMMED_TEST_FILENAME}.c${CLEAR}"
@@ -317,6 +325,7 @@ unit_test() {
 			echo "${DEPS_PATHS[*]}"
 
 			echo -e "${BLUE}>${CLEAR} Linking ${CYAN}${TRIMMED_TEST_FILENAME}.o unity.o ${DEPS_O[*]}${CLEAR} to test: ${GREEN}${TRIMMED_TEST_FILENAME}${CLEAR}"
+			echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${TESTS_BIN}/${TRIMMED_TEST_FILENAME} ${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o ${DEPS_PATHS[*]} ${TESTS_OUT}/unity/unity.o"
 			# shellcheck disable=SC2086,SC2048
 			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${TESTS_BIN}/${TRIMMED_TEST_FILENAME}" "${TESTS_OUT}/${TRIMMED_TEST_FILENAME}.o" ${DEPS_PATHS[*]} "${TESTS_OUT}/unity/unity.o"
 			echo -e "${GREEN}✓${CLEAR} Successfully linked ${CYAN}${TRIMMED_TEST_FILENAME}.o unity.o ${DEPS_O[*]}${CLEAR} to test: ${GREEN}${TRIMMED_TEST_FILENAME}${CLEAR}"
