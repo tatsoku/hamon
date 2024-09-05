@@ -18,6 +18,7 @@ pkgs.mkShell {
     beautysh
     shfmt
     shellcheck
+    cmake
   ];
   shellHook = ''
     pre-commit install

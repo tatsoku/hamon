@@ -1,5 +1,5 @@
 #define COLORS
-#include "headers/builtins.h"
+#include <hamon_builtins.h>
 
 #include <dirent.h>
 #include <libgen.h>
@@ -18,7 +18,7 @@
 #include <bsd/string.h>
 #include <windows.h>
 
-#include "headers/error.h"
+#include <hamon_error.h>
 
 #else
 #error Get a better operating system, loser.

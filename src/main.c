@@ -4,11 +4,11 @@
 #define COLORS
 #define GRAPHICS
 
-#include "hamon/headers/cli.h"
-#include "hamon/headers/config.h"
-#include "hamon/headers/escape.h"
-#include "hamon/headers/meta.h"
-#include "hamon/headers/prompt.h"
+#include <hamon_cli.h>
+#include <hamon_config.h>
+#include <hamon_escape.h>
+#include <hamon_meta.h>
+#include <hamon_prompt.h>
 
 /*
  ▄▄                                                ▄▄

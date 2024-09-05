@@ -12,13 +12,13 @@
 #include <bsd/string.h>
 #include <windows.h>
 
-#include "headers/error.h"
+#include <hamon_error.h>
 
 #endif
 
-#include "headers/config.h"
-#include "headers/escape.h"
-#include "headers/file.h"
+#include <hamon_config.h>
+#include <hamon_escape.h>
+#include <hamon_file.h>
 
 /*
  * Default configuration:

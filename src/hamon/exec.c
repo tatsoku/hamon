@@ -15,7 +15,7 @@
 #include <bsd/string.h>
 #include <windows.h>
 
-#include "headers/error.h"
+#include <hamon_error.h>
 
 #else
 #error Get a better operating system, loser
@@ -23,8 +23,8 @@
 
 #define COLORS
 
-#include "headers/escape.h"
-#include "headers/exec.h"
+#include <hamon_escape.h>
+#include <hamon_exec.h>
 
 #if _WIN32
 BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {

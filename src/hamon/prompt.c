@@ -18,10 +18,10 @@
 
 #define CURSORS
 
-#include "headers/builtins.h"
-#include "headers/escape.h"
-#include "headers/exec.h"
-#include "headers/prompt.h"
+#include <hamon_builtins.h>
+#include <hamon_escape.h>
+#include <hamon_exec.h>
+#include <hamon_prompt.h>
 
 char *get_hostname() {
   char *hostname = {0};

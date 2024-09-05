@@ -7,7 +7,7 @@
 #include <io.h>
 #include <windows.h>
 
-#include "headers/error.h"
+#include <hamon_error.h>
 
 #elif __linux__
 
@@ -21,8 +21,8 @@
 
 #define COLORS
 
-#include "headers/escape.h"
-#include "headers/file.h"
+#include <hamon_escape.h>
+#include <hamon_file.h>
 
 int write_file(const char *filename, const char *content, const size_t size) {
   FILE *file = fopen(filename, "w");

@@ -14,9 +14,9 @@
 
 #endif
 
-#include "headers/cli.h"
-#include "headers/escape.h"
-#include "headers/meta.h"
+#include <hamon_cli.h>
+#include <hamon_escape.h>
+#include <hamon_meta.h>
 
 typedef struct {
   char *first;

@@ -1,6 +1,8 @@
-/bin/
-/out/
+/build/bin/
+/build/out/
+/build/tests/
 /hsh
 /hamon
 /tests/unity
 /vgcore
+/compile_commands.json

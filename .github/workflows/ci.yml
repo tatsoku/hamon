@@ -1,22 +1,25 @@
 name: C Test CI
 on:
   push:
-    branches: [$default-branch]
+    branches: [main]
   pull_request:
-    branches: [$default-branch]
+    branches: [main]
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - name: Install mold
+      - name: Install mold on ubuntu systems
+        if: matrix.os == 'ubuntu-24.04'
         uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0 # v1
       - name: Install just
         uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
       - name: Test build
         shell: bash
-        run: "just build \n"
+        run: just build
       - name: Run unit-tests
         shell: bash
-        run: |-
-          just test
+        run: just test
