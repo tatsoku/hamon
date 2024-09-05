@@ -2,7 +2,7 @@
 
 #include "unity/unity.h"
 
-#include "../src/hamon/headers/exec.h"
+#include <hamon_exec.h>
 
 void setUp() {}
 
@@ -12,9 +12,8 @@ char *envp[1] = {0};
 
 void test_exec(void) {
   char *argv0[3] = {"touch", "file.txt", 0};
-  int status = 0;
 
-  int status0 = execute(argv0[0], argv0, status, envp);
+  int status0 = execute(argv0[0], argv0, envp);
   TEST_ASSERT_EQUAL_INT8(0, status0);
 
   remove("file.txt");

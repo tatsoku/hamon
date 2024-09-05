@@ -1,9 +1,9 @@
 // DEPS=("builtins")
 
 #define COLORS
-#include "../src/hamon/headers/builtins.h"
-#include "../src/hamon/headers/escape.h"
 #include "unity/unity.h"
+#include <hamon_builtins.h>
+#include <hamon_escape.h>
 
 char *envp[1] = {0};
 

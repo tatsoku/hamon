@@ -24,6 +24,7 @@ jobs:
           msystem: ${{ matrix.sys }}
           install: |
             libbsd
+            git
             mingw-w64-${{matrix.env}}-just
             mingw-w64-${{matrix.env}}-clang
       - name: Install just on ubuntu

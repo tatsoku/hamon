@@ -3,8 +3,8 @@
 #include "unity/unity.h"
 #include <stdlib.h>
 
-#include "../src/hamon/headers/config.h"
-#include "../src/hamon/headers/file.h"
+#include <hamon_config.h>
+#include <hamon_file.h>
 
 #ifdef _WIN32
 char folder_buffer[MAX_PATH] = {0};

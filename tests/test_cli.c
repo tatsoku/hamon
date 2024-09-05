@@ -5,8 +5,8 @@
 
 #define COLORS
 
-#include "../src/hamon/headers/cli.h"
-#include "../src/hamon/headers/escape.h"
+#include <hamon_cli.h>
+#include <hamon_escape.h>
 
 void setUp(void) {}
 

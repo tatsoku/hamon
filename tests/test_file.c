@@ -5,8 +5,8 @@
 #define COLORS
 #define GRAPHICS
 
-#include "../src/hamon/headers/escape.h"
-#include "../src/hamon/headers/file.h"
+#include <hamon_escape.h>
+#include <hamon_file.h>
 
 char *folder = "./test_folder/";
 char *file = "./testfile.txt";

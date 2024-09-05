@@ -8,8 +8,8 @@
 #define COLORS
 #define GRAPHICS
 
-#include "../src/hamon/headers/escape.h"
-#include "../src/hamon/headers/prompt.h"
+#include <hamon_escape.h>
+#include <hamon_prompt.h>
 
 char *username = {0};
 char *hostname = {0};

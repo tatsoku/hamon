@@ -5,8 +5,8 @@
 #define COLORS
 #define GRAPHICS
 
-#include "../src/hamon/headers/escape.h"
 #include "unity/unity.h"
+#include <hamon_escape.h>
 
 char *codes[1] = {CYAN_CODE};
 char *assembled_escape = {0};
@@ -19,7 +19,7 @@ void test_assemble(void) {
   TEST_ASSERT_NOT_NULL(assembled_escape);
 
   printf("[%sTEST%s] <%stest_assemble%s> %s %s %sThis is what the escape "
-         "looks like on your terminal!\n",
+         "looks like on your terminal!\n" CLEAR,
          BLUE, CLEAR, RED, CLEAR, STRIKETHROUGH, CLEAR, assembled_escape);
 }
 
