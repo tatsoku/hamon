@@ -63,7 +63,7 @@ jobs:
             motd.ubuntu.com:443
             objects.githubusercontent.com:443
             packages.microsoft.com:443
-            uploads.github.com:443      
+            uploads.github.com:443
       - name: Checkout repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         # Initializes the CodeQL tools for scanning.
@@ -90,6 +90,8 @@ jobs:
           echo "export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
       - name: Enable Mold.
         uses: rui314/setup-mold@0bf4f07ef9048ec62a45f9dbf2f098afa49695f0 # v1
+      - name: Install just on ubuntu
+        uses: extractions/setup-just@dd310ad5a97d8e7b41793f8ef055398d51ad4de6 # v2
       - name: Install dependencies.
         shell: bash
         run: |
@@ -99,9 +101,8 @@ jobs:
         if: matrix.build-mode == 'manual'
         shell: bash
         run: |
-          ./scripts/build.sh -c hshell
-          ./scripts/build.sh -l hshell
-          mv ./bin/hshell .
+          just build
+          mv ./build/bin/hsh .
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@4dd16135b69a43b6c8efb853346f8437d92d3c93 # v3.26.6
         with:
