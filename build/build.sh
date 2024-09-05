@@ -72,7 +72,7 @@ if ${COLOR}; then
 	CLEAR="${ESCAPE}[0m"
 fi
 
-CFLAGS="-O3 -Wall -Wextra -I./"
+CFLAGS="-O3 -Wall -Wextra -I./include/"
 
 LINKER_FLAGS="-Wall -Wextra"
 
