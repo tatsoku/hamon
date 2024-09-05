@@ -61,12 +61,13 @@ char *get_exec_path(const char *name, char *const *envp) {
       strlcpy(path, *envp, 4096);
       break;
     }
+    envp++;
   }
 
   char *full_path = (char *)malloc(1024);
   char *token = 0;
 
-  token = strtok(path, ":");
+  token = strtok(strdup(path), ":");
   while (token != 0) {
     snprintf(full_path, 1024, "%s/%s", token, name);
 
@@ -75,6 +76,7 @@ char *get_exec_path(const char *name, char *const *envp) {
     }
     token = strtok(0, ":");
   }
+  return 0;
 }
 
 int execute(char *executable, char *argv[], char *const *envp) {

@@ -108,7 +108,6 @@ int init_prompt(void) {
 #endif
   int argc = 0;
   int env_count = 0;
-  int non_env_arg_index = 0;
 
   while (*envp) {
     env[env_count++] = (char *)*envp;
@@ -137,17 +136,11 @@ int init_prompt(void) {
       if (is_env_format(argv[argi])) {
         printf("User specified env variable: %s\n", argv[argi]);
         env[env_count++] = argv[argi];
+      } else {
+        strlcpy(executable, argv[argi], 128);
+        break;
       }
     }
-
-    for (int argi = 0; argi < argc && non_env_arg_index < argc; argi++) {
-      if (!is_env_format(argv[argi])) {
-        argv[non_env_arg_index++] = argv[argi];
-      }
-    }
-
-    argc = non_env_arg_index;
-    strlcpy(executable, argv[argc - 1], 128);
 
     if (check_builtins(argc, argv, env) == -1) {
       if (execute(executable, argv, env) == -1)
