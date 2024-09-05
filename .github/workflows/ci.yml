@@ -28,7 +28,7 @@ jobs:
       - name: Test build on windows
         if: matrix.os == 'windows-latest'
         shell: powershell
-        run: msys -c 'just build'
+        run: msys2 -c 'just build'
       - name: Test build on ubuntu
         if: matrix.os == 'ubuntu-24.04'
         shell: bash
@@ -36,7 +36,7 @@ jobs:
       - name: Run unit-tests on windows
         if: matrix.os == 'windows-latest'
         shell: powershell
-        run: msys -c 'just test'
+        run: msys2 -c 'just test'
       - name: Run unit-tests on ubuntu
         if: matrix.os == 'ubuntu-24.04'
         shell: bash
