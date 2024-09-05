@@ -26,7 +26,7 @@ default:
 @run args="" name="hsh": fix_perms
   just compile {{name}}
   just link {{name}}
-  ./bin/{{name}} {{args}}
+  ./build/bin/{{name}} {{args}}
 
 @debug args="" name="hsh": fix_perms
   just compile --debug
