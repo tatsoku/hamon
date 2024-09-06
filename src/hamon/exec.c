@@ -81,9 +81,8 @@ char *get_exec_path(const char *name, char *const *envp) {
 
 int execute(char *executable, char *argv[], char *const *envp) {
 #ifdef __linux__
-  pid_t pid = fork();
   int status = 0;
-  char *path = 0;
+  char *path = {0};
 
   if (access(executable, X_OK) == 0) {
     path = executable;
@@ -91,23 +90,23 @@ int execute(char *executable, char *argv[], char *const *envp) {
     path = get_exec_path(executable, envp);
   }
 
+  if (!path) {
+    fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
+    free(path);
+    return -1;
+  }
+
+  pid_t pid = fork();
+
   if (pid < 0) {
     perror("failed to fork");
   } else if (pid == 0) {
     if (execve(path, argv, envp) != 0) {
-      if (errno == ENOENT) {
-        fprintf(stderr, RED "!%s %s: Command not found\n", CLEAR, executable);
-        printf("%s\n", path);
-        path = 0;
-        free(path);
-        exit(-1);
-      }
-
-      perror("Failed to exec to childprocess. (execvp)");
-      return -1;
+      perror("Failed to exec to childprocess (execve)");
+      exit(-1);
     } else {
       free(path);
-      return 0;
+      exit(0);
     }
   } else {
     wait(&status);

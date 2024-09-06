@@ -31,7 +31,7 @@ default:
 @debug args="" name="hsh": fix_perms
   just compile --debug
   just link {{name}}
-  valgrind ./bin/{{name}} {{args}}
+  valgrind ./build/bin/{{name}} {{args}}
 
 @clear_cores: fix_perms
   build/build.sh -vg
