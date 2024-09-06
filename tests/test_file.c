@@ -1,4 +1,4 @@
-// DEPS=("file")
+// DEPS=("file" "error")
 
 #include "unity/unity.h"
 
@@ -8,8 +8,14 @@
 #include <hamon_escape.h>
 #include <hamon_file.h>
 
+#ifdef _WIN32
+char *folder = ".\\test_folder\\";
+char *file = ".\\testfile.txt";
+#elif __linux__
 char *folder = "./test_folder/";
 char *file = "./testfile.txt";
+#else Use a better operating system, loser
+#endif
 char *file_content = "test";
 char *file_buf = {0};
 
@@ -18,7 +24,7 @@ void setUp(void) {}
 void tearDown(void) {}
 
 void test_write_file(void) {
-  int status = write_file(file, file_content, 4);
+  int status = write_file(file, file_content);
   TEST_ASSERT_EQUAL_INT8(1, status);
 }
 
@@ -31,6 +37,11 @@ void test_read_file(void) {
 
 void test_compare_file_contents(void) {
   int status = compare_file_contents(file, file_content, 4);
+  TEST_ASSERT_EQUAL_INT8(1, status);
+}
+
+void test_remove_file(void) {
+  int status = remove_file(file);
   TEST_ASSERT_EQUAL_INT8(1, status);
 }
 

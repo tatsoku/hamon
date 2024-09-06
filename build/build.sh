@@ -57,7 +57,9 @@ TESTS_BIN="${BUILD}/tests/bin"
 
 UNITY_TAG="v2.6.0"
 
-#INCLUDE="$(pwd)/include"
+EXCLUDE=("file.c" "config.c" "prompt.c" "exec.c" "error.c" "builtins.c" "escape.c")
+
+#LIB="$(pwd)/lib"
 COLOR=true
 
 CC="clang"
@@ -74,12 +76,12 @@ fi
 
 CFLAGS="-O3 -Wall -Wextra -I./include/"
 
-LINKER_FLAGS="-Wall -Wextra"
+LINKER_FLAGS=""
 
 if [[ ${OSTYPE} != "msys" ]]; then
 	LINKER_FLAGS+=" -fuse-ld=mold"
 else
-	CFLAGS+=" -I/usr/include"
+	CFLAGS+=" -I/usr/include -fsanitize=address"
 	LINKER_FLAGS+=" -lbsd -L/usr/lib"
 fi
 
@@ -142,34 +144,40 @@ EOF
 
 compile() {
 	local -a C_FILES
+	local -a C_FILES_RL
 
-	local -a TRIMMED_C_FILES
-	local -a TRIMMED_C_FILENAMES
+	local -a TRIMMED_FILES
+	local -a CFILE_DIFF
 
 	local RECOMPILE
-	local TRIMMED_C_FILE
-	local TRIMMED_C_FILENAME
+	local TRIMMED_FILE
+
+	if ! [[ ${#EXCLUDE[@]} -eq 0 ]]; then
+		echo -e "Housekeeping!!!"
+    	clean "${OUT}" "${BIN}" "y"
+	fi
 
 	mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
+	for i in "${!C_FILES[@]}"; do C_FILES_RL[i]="$(basename "${C_FILES[i]}")"; done
 
-	for ((i = 0; i < ${#C_FILES[@]}; i++)); do
-		TRIMMED_C_FILE="${C_FILES[${i}]%.*}"
-		TRIMMED_C_FILENAME="${TRIMMED_C_FILE##*/}"
-		TRIMMED_C_FILES+=("${TRIMMED_C_FILE}")
-		TRIMMED_C_FILENAMES+=("${TRIMMED_C_FILENAME}")
-		echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${C_FILES[${i}]}${CLEAR}"
-		if [[ -f "${OUT}/${TRIMMED_C_FILENAME}.o" ]]; then
-			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_C_FILENAME}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
+	CFILE_DIFF=($(comm -23 <(printf "%s\n" "${C_FILES_RL[@]}" | sort) <(printf "%s\n" "${EXCLUDE[@]}" | sort)))
+
+	for ((i = 0; i < ${#CFILE_DIFF[@]}; i++)); do
+		TRIMMED_FILE="${CFILE_DIFF[${i}]%.*}"
+		TRIMMED_FILES+=("${TRIMMED_FILE}")
+		echo -e "${BLUE}>${CLEAR} Compiling: ${CYAN}${TRIMMED_FILE}.c${CLEAR}"
+		if [[ -f "${OUT}/${TRIMMED_FILE}.o" ]]; then
+			echo -ne "${YELLOW}!${CLEAR} ${CYAN}${TRIMMED_FILE}.o${CLEAR} seems to already exist, you wanna recompile it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 			read -r RECOMPILE
 			if [[ ! ${RECOMPILE} =~ [Nn] ]]; then
-				echo -e "Running: ${CC} ${CFLAGS} -c ${C_FILES[${i}]} -o ${OUT}/${TRIMMED_C_FILENAME}.o"
+				echo -e "Running: ${CC} ${CFLAGS} -c ${DIR}/${TRIMMED_FILE}.c -o ${OUT}/${TRIMMED_FILE}.o"
 				# shellcheck disable=SC2086
-				"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+				"${CC}" ${CFLAGS} -c "${DIR}/${TRIMMED_FILE}.c" -o "${OUT}/${TRIMMED_FILE}.o"
 			fi
 		else
-			echo -e "Running: ${CC} ${CFLAGS} -c ${C_FILES[${i}]} -o ${OUT}/${TRIMMED_C_FILENAME}.o"
+			echo -e "Running: ${CC} ${CFLAGS} -c ${DIR}/${TRIMMED_FILE}.c -o ${OUT}/${TRIMMED_FILE}.o"
 			# shellcheck disable=SC2086
-			"${CC}" ${CFLAGS} -c "${C_FILES[${i}]}" -o "${OUT}/${TRIMMED_C_FILENAME}.o"
+			"${CC}" ${CFLAGS} -c "${DIR}/${TRIMMED_FILE}.c" -o "${OUT}/${TRIMMED_FILE}.o"
 		fi
 	done
 
@@ -178,8 +186,8 @@ compile() {
 	# shellcheck disable=SC2086
 	"${CC}" ${CFLAGS} -c "${SRC}/main.c" -o "${OUT}/main.o"
 
-	for i in "${!TRIMMED_C_FILENAMES[@]}"; do TRIMMED_C_FILENAMES[i]="${TRIMMED_C_FILENAMES[i]}.c"; done
-	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_C_FILENAMES[*]}${CLEAR} & ${CYAN}main.c${CLEAR} successfully"
+	for i in "${!TRIMMED_FILES[@]}"; do TRIMMED_FILES[i]="${TRIMMED_FILES[i]}.c"; done
+	echo -e "${GREEN}✓${CLEAR} Compiled ${CYAN}${TRIMMED_FILES[*]}${CLEAR} & ${CYAN}main.c${CLEAR} successfully"
 }
 
 # links all object files in out/ to an executable in /bin
@@ -207,7 +215,7 @@ link() {
 	pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
 	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}"
-
+	for i in "${!TRIMMED_FILES[@]}"; do TRIMMED_FILES[i]="${OUT}/${TRIMMED_FILES[i]}"; done
 	if [[ -f "${BIN}/${EXECUTABLE_NAME}" ]]; then
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
@@ -348,7 +356,7 @@ unit_test() {
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1
 
-	#rm -fr "${TESTS_OUT}" "${TESTS_BIN}"
+	# rm -fr "${TESTS_OUT}" "${TESTS_BIN}"
 }
 
 # removes dangling object files that shouldn't be there, used to be required, not that much as of lately though.
@@ -386,8 +394,8 @@ clean() {
 	local LOCALBIN
 	local LOG
 
-	LOCALOUT=${1}
-	LOCALBIN=${2}
+	LOCALOUT=${1:?}
+	LOCALBIN=${2:?}
 	CONFIRMATION=${3}
 	LOG=${4:true}
 
@@ -401,10 +409,10 @@ clean() {
 		CLEAN="y"
 	fi
 	if [[ ${CLEAN} =~ [Yy] ]]; then
-		rm -fr "${LOCALOUT:?}/*"
-		rm -fr "${LOCALBIN:?}/*"
+		rm -fr "${LOCALOUT}"/*
+		rm -fr "${LOCALBIN}"/*
 		if ${LOG}; then
-			echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}${CLEAR} & ${CYAN}${LOCALBIN}${CLEAR} successfully."
+			echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}/*${CLEAR} & ${CYAN}${LOCALBIN}/*${CLEAR} successfully."
 		fi
 	else
 		echo -e "${GREEN}✓${CLEAR} Cancelled."

@@ -1,4 +1,4 @@
-// DEPS=("prompt" "builtins" "exec")
+// DEPS=("prompt" "builtins" "exec" "error")
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -155,6 +155,8 @@ const char *default_config =
 
 int gen_default_config(void) {
   size_t config_buffer_size = strlen(default_config);
+  printf("Config buffer size: %zu\n", config_buffer_size);
+
   char *config_buffer = {0};
 
   config_buffer = (char *)malloc(config_buffer_size);
@@ -168,6 +170,8 @@ int gen_default_config(void) {
     free(config_buffer);
     return -1;
   }
+
+  printf("Config buffer: %s\n", config_buffer);
 
 #ifdef _WIN32
   char folder_buffer[MAX_PATH] = {0};
@@ -186,6 +190,9 @@ int gen_default_config(void) {
     win_perror("snprintf");
     return -1;
   }
+  printf("Folder: %s\n", folder_buffer);
+  printf("Path: %s\n", absolute_path_buffer);
+
 #elif __linux__
   char folder_buffer[1024] = {0};
   char absolute_path_buffer[1024] = {0};
@@ -214,8 +221,7 @@ int gen_default_config(void) {
   }
 
   if (read_file(absolute_path_buffer)) {
-    int status =
-        write_file(absolute_path_buffer, config_buffer, config_buffer_size);
+    int status = write_file(absolute_path_buffer, config_buffer);
 
     if (!status) {
       free(config_buffer);

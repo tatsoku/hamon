@@ -38,6 +38,11 @@ default:
   just link {{name}}
   lldb ./build/bin/{{name}}.exe {{args}}
 
+@debug-no-debugger args="" name="hsh": fix_perms
+  just compile --debug
+  just link {{name}}
+  ./build/bin/{{name}} {{args}}
+
 @clear_cores: fix_perms
   build/build.sh -vg
 

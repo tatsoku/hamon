@@ -47,6 +47,9 @@ int info_for_flag(Info *info) {
   int first_arg_len = info->first_arg_len;
   const char *use = info->use;
 
+  printf("%s\n", use);
+  printf("%zu\n", strlen(use));
+
   char *buffer = {0};
   buffer = (char *)malloc((first_arg_len + strlen(use)) * sizeof(char));
   if (!buffer) {
@@ -54,7 +57,7 @@ int info_for_flag(Info *info) {
     return 1;
   }
 
-  snprintf(buffer, ((first_arg_len * 2 + strlen(use)) - 3), use, first_arg,
+  snprintf(buffer, first_arg_len * 2 + strlen(use) + 1, use, first_arg,
            first_arg);
 
   printf("%s", flags[0]);

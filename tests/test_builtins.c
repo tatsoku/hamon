@@ -1,4 +1,4 @@
-// DEPS=("builtins")
+// DEPS=("builtins" "error")
 
 #define COLORS
 #include "unity/unity.h"

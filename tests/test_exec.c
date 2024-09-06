@@ -1,4 +1,4 @@
-// DEPS=("exec")
+// DEPS=("exec" "error")
 
 #include "unity/unity.h"
 

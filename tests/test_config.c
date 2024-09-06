@@ -1,4 +1,9 @@
-// DEPS=("config" "file")
+// DEPS=("config" "file" "error")
+
+#ifdef _WIN32
+#include <hamon_error.h>
+#include <windows.h>
+#endif
 
 #include "unity/unity.h"
 #include <stdlib.h>
@@ -32,9 +37,10 @@ void setUp(void) {
     win_perror("snprintf");
     return;
   }
-#endif
 
-#ifdef __linux__
+  printf("Folder: %s\n", folder_buffer);
+  printf("Path: %s\n", absolute_path_buffer);
+#elif __linux__
   int res1 = snprintf(folder_buffer, 1024, "%s/.config/hamon/", getenv("HOME"));
   if (res1 < 0 || res1 >= 1024) {
     perror("snprintf");
@@ -55,7 +61,9 @@ void setUp(void) {
 void tearDown(void) {}
 
 void test_gen(void) {
+  printf("Folder: %s\n", folder_buffer);
   int status0 = gen_default_config();
+
   TEST_ASSERT_EQUAL_INT8(1, status0);
 
   int status1 = check_if_folder_exists(folder_buffer);
