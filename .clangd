@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: [-Wall, -Wextra, -I./]
+  Add: [-Wall, -Wextra, -I./include/]

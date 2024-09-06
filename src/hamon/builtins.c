@@ -169,7 +169,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 #elif _WIN32
   char cwd_buf[MAX_PATH] = {0};
 
-  GetCurrentDirectory(MAX_PATH, (LPWSTR)cwd_buf);
+  GetCurrentDirectory(MAX_PATH, (LPSTR)cwd_buf);
   strlcpy(last_dir, cwd_buf, MAX_PATH);
 
   if (strncmp(path, "~", 1) == 0) {
@@ -178,7 +178,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
     strlcpy(path, last_dir, MAX_PATH);
   }
 
-  if (!SetCurrentDirectory((LPWSTR)path)) {
+  if (!SetCurrentDirectory((LPSTR)path)) {
     win_perror("Couldn't change directory.");
     return 1;
   }

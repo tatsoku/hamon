@@ -64,7 +64,7 @@ _et voilà!_ Now it should be located in ./bin/ aswell.
 
 ## Contributing
 
-Contribution is simple, make sure you're running an editor that works with C.
+Contribution is simple, make sure you're running an editor that works with C and is using clang for compilation.
 
 Such as:
 
@@ -83,6 +83,13 @@ for Powershell or Batch,
 which is ick, but I'll gladly accept a pr for it.
 
 Also, one final thing, make sure you have pre-commit hooks.
+
+> \[!NOTE\]
+> Windows people!
+
+Just copy and paste the win_compile_commands.json in build and change it so it fits your path.
+
+Don't forget to rename it to compile_commands.json!
 
 _direnv users who don't use nix, i'm sorry :(_
 

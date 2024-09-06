@@ -164,7 +164,7 @@ int gen_default_config(void) {
   }
 
   size_t length = strlcpy(config_buffer, default_config, config_buffer_size);
-  if (length > sizeof(config_buffer_size)) {
+  if (length > config_buffer_size) {
     free(config_buffer);
     return -1;
   }

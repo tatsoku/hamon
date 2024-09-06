@@ -52,7 +52,7 @@ BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
   return FALSE;
 }
 #endif
-
+#ifdef __linux__
 char *get_exec_path(const char *name, char *const *envp) {
   char path[4096] = {0};
 
@@ -78,6 +78,7 @@ char *get_exec_path(const char *name, char *const *envp) {
   }
   return 0;
 }
+#endif
 
 int execute(char *executable, char *argv[], char *const *envp) {
 #ifdef __linux__
@@ -103,6 +104,7 @@ int execute(char *executable, char *argv[], char *const *envp) {
   } else if (pid == 0) {
     if (execve(path, argv, envp) != 0) {
       perror("Failed to exec to childprocess (execve)");
+      free(path);
       exit(-1);
     } else {
       free(path);
@@ -110,8 +112,8 @@ int execute(char *executable, char *argv[], char *const *envp) {
     }
   } else {
     wait(&status);
+    free(path);
   }
-
 #elif _WIN32
 
   LPCSTR win_executable = (LPCSTR)executable;
@@ -147,6 +149,5 @@ int execute(char *executable, char *argv[], char *const *envp) {
   }
 
 #endif
-  free(path);
   return 0;
 }

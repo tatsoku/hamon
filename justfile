@@ -28,10 +28,15 @@ default:
   just link {{name}}
   ./build/bin/{{name}} {{args}}
 
-@debug args="" name="hsh": fix_perms
+@debug-linux args="" name="hsh": fix_perms
   just compile --debug
   just link {{name}}
   valgrind ./build/bin/{{name}} {{args}}
+
+@debug-windows args="" name="hsh": fix_perms
+  just compile --debug
+  just link {{name}}
+  lldb ./build/bin/{{name}}.exe {{args}}
 
 @clear_cores: fix_perms
   build/build.sh -vg

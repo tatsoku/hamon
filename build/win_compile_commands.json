@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:\\msys64\\home\\h4rl\\projects\\hamon-1\\build",
+  "command": "C:\\msys64\\clang64\\bin\\cc.exe  -IC:\\msys64\\home\\h4rl\\projects\\hamon-1\\include -IC:\\msys64\\usr\\include  -o CMakeFiles\\main.dir\\src\\main.c.o -c C:\\msys64\\home\\h4rl\\projects\\hamon-1\\src\\main.c",
+  "file": "C:\\msys64\\home\\h4rl\\projects\\hamon-1\\src\\main.c",
+  "output": "CMakeFiles\\main.dir\\src\\main.c.o"
+}
+]

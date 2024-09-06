@@ -12,7 +12,7 @@ void win_perror(const char *msg) {
                 0, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                 (LPTSTR)&lpMsgBuf, 0, 0);
 
-  printf("%s: %s\n", msg, lpMsgBuf);
+  printf("%s: %s\n", msg, (LPTSTR)lpMsgBuf);
   LocalFree(lpMsgBuf);
 }
 #endif

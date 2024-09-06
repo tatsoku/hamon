@@ -80,7 +80,7 @@ if [[ ${OSTYPE} != "msys" ]]; then
 	LINKER_FLAGS+=" -fuse-ld=mold"
 else
 	CFLAGS+=" -I/usr/include"
-	LINKER_FLAGS="-lbsd ${LINKER_FLAGS}"
+	LINKER_FLAGS+=" -lbsd -L/usr/lib"
 fi
 
 if [[ ${2} == "--debug" ]]; then
@@ -435,7 +435,7 @@ clear_vgcores() {
 fix_clangd() {
 	cmake -Bbuild -DCMAKE_EXPORT_COMPILE_COMMANDS=ON >/dev/null
 	mv build/compile_commands.json .
-	find build -mindepth 1 ! -path "build/bin" ! -path "build/out" ! -path "build/tests" ! -name "build.sh" -exec rm -rf {} +
+	find build -mindepth 1 ! -path "build/bin" ! -path "build/win_compile_commands.json" ! -path "build/out" ! -path "build/tests" ! -name "build.sh" -exec rm -rf {} +
 }
 
 case $1 in
