@@ -1,5 +1,4 @@
-{ pkgs ? import <nixpkgs> {}}:
-
+{pkgs ? import <nixpkgs> {}}:
 pkgs.mkShell {
   allowUnfree = true;
   name = "hamon!";
@@ -11,7 +10,17 @@ pkgs.mkShell {
     pre-commit
     bash-language-server
     valgrind
+    yamlfix
+    yamlfmt
+    alejandra
+    cbfmt
+    mdformat
+    beautysh
+    shfmt
+    shellcheck
+    cmake
   ];
   shellHook = ''
+    pre-commit install
   '';
 }

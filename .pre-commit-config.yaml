@@ -12,11 +12,6 @@ repos:
     hooks:
       - id: clang-format
       - id: clang-tidy
-      - id: oclint
-      - id: uncrustify
-      - id: cppcheck
-      - id: cpplint
-      - id: include-what-you-use
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:

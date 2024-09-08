@@ -1,11 +1,24 @@
 #define COLORS
 
-#include "headers/config.h"
-#include "headers/escape.h"
-#include "headers/file.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-// includes.
-#include "../../include/toml-c.h"
+#ifdef __linux__
+
+#include <string.h>
+
+#elif _WIN32
+
+#include <bsd/string.h>
+#include <windows.h>
+
+#include <hamon_error.h>
+
+#endif
+
+#include <hamon_config.h>
+#include <hamon_escape.h>
+#include <hamon_file.h>
 
 /*
  * Default configuration:
@@ -80,8 +93,10 @@ const char *default_config =
     "# ██    ██  ▄██▀▀▀██  ██ ██ ██  ██    ██  ██    ██  ▀▀\n"
     "# ██    ██  ██▄▄▄███  ██ ██ ██  ▀██▄▄██▀  ██    ██  ▄▄\n"
     "# ▀▀    ▀▀   ▀▀▀▀ ▀▀  ▀▀ ▀▀ ▀▀    ▀▀▀▀    ▀▀    ▀▀  ▀▀\n\n"
+
     "# !! Main configuration for theming and prompt\n"
     "# More advanced theming will happen at a way later date.\n\n"
+
     "[prompt]\n"
     "hostname          = true\n"
     "username          = true\n"
@@ -91,20 +106,26 @@ const char *default_config =
     "color             = true\n"
     "nerd_fonts        = true\n"
     "prompt            = \">\"\n\n"
+
     "# Format settings.\n"
     "# If something isn't enabled, just remove it from the format\n"
     "# or leave it in, it will be ignored anyway.\n\n"
+
     "format = \"{username_icon} {username} @ {hostname_icon} {hostname} | "
     "{cd}{git_icon}{git_tree} {git}\"\n\n"
+
     "# !! Color config,\n"
     "# !IMPORTANT! None of these settings will be applied if color is "
     "false.\n\n"
+
     "# Color variations available:\n"
     "# [ \"black\", \"red\", \"green\", \"yellow\", \"blue\", \"magenta\", "
     "\"cyan\" ]\n\n"
+
     "# To keep something uncolored, just set it to \"\".\n"
     "# 256 colors will be supported at a later date. (I'm too lazy to make it "
     "use 256 color ansi escapes currently)\n\n"
+
     "[colors]\n"
     "prompt_bg_color   = \"\"\n"
     "prompt_fg_color   = \"green\"\n\n"
@@ -117,10 +138,12 @@ const char *default_config =
     "# !! Nerd fonts config.\n"
     "# !IMPORTANT! None of these settings will be applied if nerd_fonts is "
     "false.\n\n"
+
     "[nerd_fonts]\n"
     "hostname_icon     = \"󰌢\"\n"
     "username_icon     = \"\"\n"
     "cd_icon           = \"\"\n\n"
+
     "# git branch statuses.\n"
     "git_tree          = [ \"󰘬\", \"󱓏\", \"󱓋\", \"󱓊\", \"󱓍\", "
     "\"󱓌\", \"󱓎\" ]\n"
@@ -131,52 +154,80 @@ const char *default_config =
  */
 
 int gen_default_config(void) {
-  size_t env_size = 0;
-  size_t folder_buffer_size = 0;
-  char *folder_buffer = {0};
-
   size_t config_buffer_size = strlen(default_config);
+  printf("Config buffer size: %zu\n", config_buffer_size);
+
   char *config_buffer = {0};
 
   config_buffer = (char *)malloc(config_buffer_size);
   if (!config_buffer) {
     perror("malloc");
-    return 1;
+    return -1;
   }
 
-  strlcpy(config_buffer, default_config, config_buffer_size);
+  size_t length = strlcpy(config_buffer, default_config, config_buffer_size);
+  if (length > config_buffer_size) {
+    free(config_buffer);
+    return -1;
+  }
 
-#if _WIN32
-  env_size = strlen(getenv("APPDATA"));
-  folder_buffer_size = strlen("\\hamon\\") + env_size + 1;
-  folder_buffer = (char *)malloc(folder_buffer_size);
-  snprintf(folder_buffer, folder_buffer_size, "%s\\hamon\\", getenv("APPDATA"));
+  printf("Config buffer: %s\n", config_buffer);
+
+#ifdef _WIN32
+  char folder_buffer[MAX_PATH] = {0};
+  char absolute_path_buffer[MAX_PATH] = {0};
+
+  int res1 =
+      snprintf(folder_buffer, MAX_PATH, "%s\\hamon\\", getenv("APPDATA"));
+  if (res1 < 0 || res1 >= MAX_PATH) {
+    win_perror("snprintf");
+    return -1;
+  }
+
+  int res2 =
+      snprintf(absolute_path_buffer, MAX_PATH, "%sconfig.toml", folder_buffer);
+  if (res2 < 0 || res2 >= 1024) {
+    win_perror("snprintf");
+    return -1;
+  }
+  printf("Folder: %s\n", folder_buffer);
+  printf("Path: %s\n", absolute_path_buffer);
+
 #elif __linux__
-  env_size = strlen(getenv("HOME"));
-  folder_buffer_size = strlen("/.config/hamon/") + env_size + 1;
-  folder_buffer = (char *)malloc(folder_buffer_size);
-  snprintf(folder_buffer, folder_buffer_size, "%s/.config/hamon/",
-           getenv("HOME"));
-#endif
+  char folder_buffer[1024] = {0};
+  char absolute_path_buffer[1024] = {0};
 
+  int res1 = snprintf(folder_buffer, 1024, "%s/.config/hamon/", getenv("HOME"));
+  if (res1 < 0 || res1 >= 1024) {
+    perror("snprintf");
+    return -1;
+  }
+
+  int res2 =
+      snprintf(absolute_path_buffer, 1024, "%sconfig.toml", folder_buffer);
+  if (res2 < 0 || res2 >= 1024) {
+    perror("snprintf");
+    return -1;
+  }
+#else
+#error "Use a better operating system, loser
+#endif
   if (!check_if_folder_exists(folder_buffer)) {
     if (!create_folder(folder_buffer)) {
       fprintf(stderr, RED "!%s Failed to create config directory, exiting..\n",
               CLEAR);
-      free(folder_buffer);
-      return 1;
+      return -1;
     }
   }
 
-  size_t absolute_path_buffer_size = folder_buffer_size + strlen("config.toml");
-  char *absolute_path_buffer = (char *)malloc(absolute_path_buffer_size);
-  snprintf(absolute_path_buffer, absolute_path_buffer_size, "%sconfig.toml",
-           folder_buffer);
+  if (read_file(absolute_path_buffer)) {
+    int status = write_file(absolute_path_buffer, config_buffer);
 
-  int status =
-      write_file(absolute_path_buffer, config_buffer, config_buffer_size);
+    if (!status) {
+      free(config_buffer);
+      return -1;
+    }
+  }
   free(config_buffer);
-  free(folder_buffer);
-  free(absolute_path_buffer);
-  return 0;
+  return 1;
 }

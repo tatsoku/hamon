@@ -2,31 +2,50 @@ default:
   just --list
 
 @fix_perms:
-  chmod +x scripts/build.sh
+  chmod +x build/build.sh
 
-@compile extra_args="":
-  scripts/build.sh -c {{extra_args}}
+@init-clangd: fix_perms
+  build/build.sh -f
 
-@link name="hsh":
-  scripts/build.sh -l {{name}}
+@compile extra_args="": fix_perms
+  build/build.sh -c {{extra_args}}
 
-@build name="hsh":
+@link name="hsh": fix_perms
+  build/build.sh -l {{name}}
+
+@test extra_arg1="" extra_arg2 ="": fix_perms
+  build/build.sh -t {{extra_arg1}} {{extra_arg2}}
+
+@setup-testing: fix_perms
+  build/build.sh -st
+
+@build name="hsh": fix_perms
   just compile {{name}}
   just link {{name}}
 
-@run args="" name="hsh":
+@run args="" name="hsh": fix_perms
   just compile {{name}}
   just link {{name}}
-  ./bin/{{name}} {{args}}
+  ./build/bin/{{name}} {{args}}
 
-@debug args="" name="hsh":
+@debug-linux args="" name="hsh": fix_perms
   just compile --debug
   just link {{name}}
-  valgrind ./bin/{{name}} {{args}}
+  valgrind ./build/bin/{{name}} {{args}}
 
-@clear_cores:
-  scripts/build.sh -vg
+@debug-windows args="" name="hsh": fix_perms
+  just compile --debug
+  just link {{name}}
+  lldb ./build/bin/{{name}}.exe {{args}}
 
-@install name="hsh":
+@debug-no-debugger args="" name="hsh": fix_perms
+  just compile --debug
+  just link {{name}}
+  ./build/bin/{{name}} {{args}}
+
+@clear_cores: fix_perms
+  build/build.sh -vg
+
+@install name="hsh": fix_perms
   just build {{name}}
   sudo mv bin/{{name}} /usr/bin/

@@ -1,10 +1,14 @@
-#define COLORS
+#include <stdio.h>
+// #include <stdlib.h>
 
-#include "hamon/headers/cli.h"
-#include "hamon/headers/config.h"
-#include "hamon/headers/escape.h"
-#include "hamon/headers/meta.h"
-#include "hamon/headers/prompt.h"
+#define COLORS
+#define GRAPHICS
+
+#include <hamon_cli.h>
+// #include <hamon_config.h>
+// #include <hamon_escape.h>
+// #include <hamon_meta.h>
+// #include <hamon_prompt.h>
 
 /*
  ▄▄                                                ▄▄
@@ -15,7 +19,7 @@
  ██    ██  ██▄▄▄███  ██ ██ ██  ▀██▄▄██▀  ██    ██  ▄▄
  ▀▀    ▀▀   ▀▀▀▀ ▀▀  ▀▀ ▀▀ ▀▀    ▀▀▀▀    ▀▀    ▀▀  ▀▀
 */
-
+/*
 int init_shell(void) {
   char *username = get_username();
   printf("Hello, %s%s%s! and welcome to..\n", GREEN, username, CLEAR);
@@ -33,14 +37,17 @@ int init_shell(void) {
   free(username);
   return 0;
 }
+*/
 
 int main(int argc, char *argv[]) {
+  printf("%d\n", argc);
+
   if (argc > 1) {
-    return process_args(argv);
+    return process_args(argc, argv);
   }
-  gen_default_config();
+  //  gen_default_config();
 
   // init_shell();
-  init_prompt();
+  // return init_prompt();
   return 0;
 }
