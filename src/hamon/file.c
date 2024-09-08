@@ -36,7 +36,7 @@ void *convert_string_to_wide(const char *str) {
 #endif
 
 int write_file(const char *filename, const char *content) {
-  FILE *file = fopen(filename, "wb");
+  FILE *file = fopen(filename, "w");
   if (!file) {
     perror("Failed to open file");
     fclose(file);
@@ -53,7 +53,7 @@ int write_file(const char *filename, const char *content) {
 }
 
 char *read_file(const char *file_path) {
-  FILE *file = fopen(file_path, "rb");
+  FILE *file = fopen(file_path, "r");
   size_t file_len = 0;
 
   if (!file) {

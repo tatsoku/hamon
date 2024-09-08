@@ -409,8 +409,8 @@ clean() {
 		CLEAN="y"
 	fi
 	if [[ ${CLEAN} =~ [Yy] ]]; then
-		rm -fr "${LOCALOUT}"/*
-		rm -fr "${LOCALBIN}"/*
+		rm -fr "${LOCALOUT:?}"/*
+		rm -fr "${LOCALBIN:?}"/*
 		if ${LOG}; then
 			echo -e "${GREEN}✓${CLEAR} Cleaned ${CYAN}${LOCALOUT}/*${CLEAR} & ${CYAN}${LOCALBIN}/*${CLEAR} successfully."
 		fi

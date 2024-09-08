@@ -87,7 +87,7 @@ char **get_environment_variables() {
   while (*ptr != '\0' && count < 4096 - 1) {
     size_t len = strlen(ptr);
     env_array[count] = malloc(len + 1);
-    strcpy(env_array[count], ptr);
+    strlcpy(env_array[count], ptr, strlen(env_array[count]) + 1);
     ptr += len + 1;
     count++;
   }
