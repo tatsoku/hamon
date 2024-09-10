@@ -1,13 +1,13 @@
-#include <fileapi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <winnt.h>
 
 #ifdef _WIN32
 
 #include <bsd/string.h>
+#include <fileapi.h>
 #include <io.h>
 #include <windows.h>
+#include <winnt.h>
 
 #include <hamon_error.h>
 

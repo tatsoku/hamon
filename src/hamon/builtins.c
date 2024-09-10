@@ -1,5 +1,5 @@
-#define COLORS
 #include <hamon_builtins.h>
+#include <hamon_env.h>
 
 #include <dirent.h>
 #include <libgen.h>
@@ -24,7 +24,10 @@
 #error Get a better operating system, loser.
 #endif
 
-enum BuiltinType { Echo, Exit, Cd, Pwd, Help };
+extern char *env[4096];
+extern int envc;
+
+enum BuiltinType { Echo, Exit, Cd, Pwd, Export, Help };
 
 int print_builtin_help(enum BuiltinType builtin) {
   switch (builtin) {
@@ -74,6 +77,16 @@ int print_builtin_help(enum BuiltinType builtin) {
 
            "hamon! made with <3\n");
     break;
+  case Export:
+    printf("export: add environment variable to environment pointer\n\n"
+
+           "export: USAGE\n"
+           "export\n\n"
+
+           "If you somehow misunderstand how export works, use cmd :)\n\n"
+
+           "hamon! made with <3\n");
+    break;
   case Help:
     printf(
         "help: show builtin commands\n\n"
@@ -91,7 +104,7 @@ int print_builtin_help(enum BuiltinType builtin) {
   return 1;
 }
 
-int builtin_echo(int argc, char *argv[], char *const *envp) {
+int builtin_echo(int argc, char *argv[]) {
   if (argc > 3 || argc < 2)
     return print_builtin_help(Echo);
 
@@ -121,7 +134,7 @@ int builtin_echo(int argc, char *argv[], char *const *envp) {
   return 0;
 }
 
-int builtin_exit(int argc, char *argv[], char *const *envp) {
+int builtin_exit(int argc, char *argv[]) {
   int code = 0;
 
   if (argc > 1) {
@@ -140,7 +153,7 @@ char last_dir[MAX_PATH] = {0};
 #error "Get a better operating system, loser"
 #endif
 
-int builtin_cd(int argc, char *argv[], char *const *envp) {
+int builtin_cd(int argc, char *argv[]) {
   if (argc > 2 || argc < 2)
     return print_builtin_help(Cd);
 
@@ -149,10 +162,8 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
 
 #ifdef __linux__
   char cwd_buf[1024] = {0};
-  char *cwd_ptr = {0};
 
-  cwd_ptr = getcwd(cwd_buf, 1024);
-  printf("cwd_ptr: %s\n", cwd_ptr);
+  char *cwd_ptr = getcwd(cwd_buf, 1024);
 
   if (strncmp(path, "~", 1) == 0) {
     strlcpy(path, getenv("HOME"), 1024);
@@ -165,7 +176,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
     return 1;
   }
 
-  strlcpy(last_dir, cwd_buf, 1024);
+  strlcpy(last_dir, cwd_ptr, 1024);
 #elif _WIN32
   char cwd_buf[MAX_PATH] = {0};
 
@@ -179,7 +190,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
   }
 
   if (!SetCurrentDirectory((LPSTR)path)) {
-    win_perror("Couldn't change directory.");
+    win_perror("Couldn't change directory");
     return 1;
   }
 #else
@@ -188,7 +199,7 @@ int builtin_cd(int argc, char *argv[], char *const *envp) {
   return 0;
 }
 
-int builtin_pwd(int argc, char *argv[], char *const *envp) {
+int builtin_pwd(int argc, char *argv[]) {
   if (argc > 1)
     return print_builtin_help(Pwd);
 
@@ -218,21 +229,49 @@ int builtin_pwd(int argc, char *argv[], char *const *envp) {
   return 0;
 }
 
-int builtin_test(int argc, char *argv[], char *const *envp) {
+int builtin_export(int argc, char *argv[]) {
+  int envc = 0;
+
+  while (env[envc] != 0)
+    envc++;
+
+  printf("env len: %d\n", envc);
+
+  if (argc < 2) {
+    for (int envi = 0; envi != envc; envi++) {
+      printf("envp[%d]: \"%s\"\n", envi, env[envi]);
+    }
+    return 0;
+  }
+
+  for (int argi = 1; argi != argc; argi++) {
+    if (!is_env_format(argv[argi])) {
+      return print_builtin_help(Export);
+    }
+    printf("Writing %s to envp position %d\n", argv[argi], envc++);
+    env[envc] = (char *)argv[argi];
+  }
+
+  printf("envp[%d]: %s\n", envc, env[envc]);
+  env[envc] = 0;
+
+  return 0;
+}
+
+int builtin_test(int argc, char *argv[]) {
   for (int i = 0; i != argc; i++) {
     printf("%d: %s\n", i, argv[i]);
   }
 
-  while (*envp) {
-    if (strncmp(*envp, "PATH", 4) == 0) {
-      puts(*envp);
+  for (int envi = 0; envi != envc; envi++) {
+    if (strncmp(env[envi], "PATH", 4) == 0) {
+      puts(env[envi]);
     }
-    envp++;
   }
   return 0;
 }
 
-int builtin_help(int argc, char *argv[], char *const *envp) {
+int builtin_help(int argc, char *argv[]) {
   if (argc > 2)
     return print_builtin_help(Help);
 
@@ -248,16 +287,17 @@ int builtin_help(int argc, char *argv[], char *const *envp) {
   return 0;
 }
 
-int check_builtins(int argc, char *argv[], char *const *envp) {
-  const char *builtin_strs[] = {"cd", "pwd", "help", "echo", "exit", "test"};
-  int (*builtin_funcs[])(int argc, char *argv[], char *const *envp) = {
-      &builtin_cd,   &builtin_pwd,  &builtin_help,
-      &builtin_echo, &builtin_exit, builtin_test};
+int check_builtins(int argc, char *argv[]) {
+  const char *builtin_strs[] = {"cd",   "pwd",  "export", "help",
+                                "echo", "exit", "test"};
+  int (*builtin_funcs[])(int argc, char *argv[]) = {
+      &builtin_cd,   &builtin_pwd,  &builtin_export, &builtin_help,
+      &builtin_echo, &builtin_exit, &builtin_test};
   int num_builtins = sizeof(builtin_strs) / sizeof(char *);
 
   for (int builtin_index = 0; builtin_index < num_builtins; builtin_index++) {
     if (strncmp(builtin_strs[builtin_index], argv[0], 4) == 0) {
-      return builtin_funcs[builtin_index](argc, argv, envp);
+      return builtin_funcs[builtin_index](argc, argv);
     }
   }
 

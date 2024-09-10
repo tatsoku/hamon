@@ -1,4 +1,4 @@
-#include <stdio.h>
+// #include <stdio.h>
 // #include <stdlib.h>
 
 #define COLORS
@@ -8,7 +8,7 @@
 // #include <hamon_config.h>
 // #include <hamon_escape.h>
 // #include <hamon_meta.h>
-// #include <hamon_prompt.h>
+#include <hamon_prompt.h>
 
 /*
  ▄▄                                                ▄▄
@@ -40,14 +40,12 @@ int init_shell(void) {
 */
 
 int main(int argc, char *argv[]) {
-  printf("%d\n", argc);
-
   if (argc > 1) {
     return process_args(argc, argv);
   }
   //  gen_default_config();
 
   // init_shell();
-  // return init_prompt();
-  return 0;
+  return init_prompt();
+  // return 0;
 }

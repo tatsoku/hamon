@@ -3,7 +3,6 @@
 
 #ifdef __linux__
 
-#include <errno.h>
 #include <linux/fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -23,8 +22,12 @@
 
 #define COLORS
 
+#include <hamon_env.h>
 #include <hamon_escape.h>
 #include <hamon_exec.h>
+
+extern char *env[4096];
+extern int envc;
 
 #if _WIN32
 BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
@@ -80,7 +83,7 @@ char *get_exec_path(const char *name, char *const *envp) {
 }
 #endif
 
-int execute(char *executable, char *argv[], char *const *envp) {
+int execute(char *executable, char *argv[]) {
 #ifdef __linux__
   int status = 0;
   char *path = {0};
@@ -88,7 +91,7 @@ int execute(char *executable, char *argv[], char *const *envp) {
   if (access(executable, X_OK) == 0) {
     path = executable;
   } else {
-    path = get_exec_path(executable, envp);
+    path = get_exec_path(executable, env);
   }
 
   if (!path) {
@@ -102,7 +105,7 @@ int execute(char *executable, char *argv[], char *const *envp) {
   if (pid < 0) {
     perror("failed to fork");
   } else if (pid == 0) {
-    if (execve(path, argv, envp) != 0) {
+    if (execve(path, argv, env) != 0) {
       perror("Failed to exec to childprocess (execve)");
       free(path);
       exit(-1);

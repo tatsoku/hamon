@@ -57,7 +57,7 @@ TESTS_BIN="${BUILD}/tests/bin"
 
 UNITY_TAG="v2.6.0"
 
-EXCLUDE=("file.c" "config.c" "prompt.c" "exec.c" "error.c" "builtins.c" "escape.c")
+#EXCLUDE=("file.c" "config.c" "prompt.c" "exec.c" "error.c" "builtins.c" "escape.c")
 
 #LIB="$(pwd)/lib"
 COLOR=true
@@ -153,14 +153,13 @@ compile() {
 	local TRIMMED_FILE
 
 	if ! [[ ${#EXCLUDE[@]} -eq 0 ]]; then
-		echo -e "Housekeeping!!!"
-    	clean "${OUT}" "${BIN}" "y"
+		clean "${OUT}" "${BIN}" "y"
 	fi
 
 	mapfile -t C_FILES < <(find "${DIR}" -type f -name "*.c")
 	for i in "${!C_FILES[@]}"; do C_FILES_RL[i]="$(basename "${C_FILES[i]}")"; done
 
-	CFILE_DIFF=($(comm -23 <(printf "%s\n" "${C_FILES_RL[@]}" | sort) <(printf "%s\n" "${EXCLUDE[@]}" | sort)))
+	mapfile -t CFILE_DIFF < <(comm -23 <(printf "%s\n" "${C_FILES_RL[@]}" | sort) <(printf "%s\n" "${EXCLUDE[@]}" | sort))
 
 	for ((i = 0; i < ${#CFILE_DIFF[@]}; i++)); do
 		TRIMMED_FILE="${CFILE_DIFF[${i}]%.*}"

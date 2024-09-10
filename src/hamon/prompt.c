@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +20,13 @@
 #define CURSORS
 
 #include <hamon_builtins.h>
+#include <hamon_env.h>
 #include <hamon_escape.h>
 #include <hamon_exec.h>
 #include <hamon_prompt.h>
+
+extern char *env[4096];
+extern int envc;
 
 char *get_hostname() {
   char *hostname = {0};
@@ -98,19 +103,40 @@ char **get_environment_variables() {
 }
 #endif
 
-bool is_env_format(const char *str) {
-  const char *equals = strchr(str, '=');
-  return equals != 0 && equals != str && *(equals + 1) != '\0';
-}
-
-void tokenize(char *input, char **tokens_buffer, char **save_ptr) {
+void tokenize(char *input, char **tokens_buffer) {
   int token_index = 0;
-  char *token = strtok_r(input, " \n", save_ptr);
-  while (token != 0) {
-    tokens_buffer[token_index] = token;
-    token = strtok_r(0, " \n", save_ptr);
-    token_index++;
+  bool in_quotes = false;
+  char *token_start = input;
+  char *p_input = input;
+
+  while (*p_input != '\0') {
+    if (*p_input == '"' || *p_input == '\'') {
+      in_quotes = !in_quotes;
+      p_input++;
+    } else if (!in_quotes && isspace(*p_input)) {
+      if (p_input > token_start) {
+        *p_input = '\0';
+        tokens_buffer[token_index++] = token_start;
+      }
+      p_input++;
+      token_start = p_input;
+    } else {
+      p_input++;
+    }
   }
+
+  if (p_input > token_start) {
+    tokens_buffer[token_index++] = token_start;
+  }
+
+  for (int i = 0; i < token_index; i++) {
+    char *token = tokens_buffer[i];
+    if (*token == '"' || *token == '\'') {
+      memmove(token, token + 1, strlen(token));
+      token[strlen(token) - 1] = '\0';
+    }
+  }
+
   tokens_buffer[token_index] = 0;
 }
 
@@ -118,22 +144,12 @@ int init_prompt(void) {
   char *prompt = "hsh >";
   char input_buf[4096] = {0};
   char *argv[4096] = {0};
-  char *save_ptr = {0};
   char executable[128] = {0};
-  char *env[1024] = {0};
 
-#ifdef __linux__
-  char **envp = __environ;
-#elif _WIN32
-  char **envp = get_environment_variables();
-#endif
   int argc = 0;
-  int env_count = 0;
 
-  while (*envp) {
-    env[env_count++] = (char *)*envp;
-    envp++;
-  }
+  init_env();
+
 #ifdef _WIN32
   free(envp);
 #endif
@@ -148,7 +164,7 @@ int init_prompt(void) {
     if (strncmp(input_buf, "", 1) == 0)
       continue;
 
-    tokenize(input_buf, argv, &save_ptr);
+    tokenize(input_buf, argv);
 
     while (argv[argc] != 0)
       argc++;
@@ -156,15 +172,15 @@ int init_prompt(void) {
     for (int argi = 0; argi != argc; argi++) {
       if (is_env_format(argv[argi])) {
         printf("User specified env variable: %s\n", argv[argi]);
-        env[env_count++] = argv[argi];
+        env[envc++] = argv[argi];
       } else {
         strlcpy(executable, argv[argi], 128);
         break;
       }
     }
 
-    if (check_builtins(argc, argv, env) == -1) {
-      if (execute(executable, argv, env) == -1)
+    if (check_builtins(argc, argv) == -1) {
+      if (execute(executable, argv) == -1)
         continue;
     }
 
