@@ -3,13 +3,14 @@
 
 #ifdef _WIN32
 
-#include <bsd/string.h>
+#include "../../include/hamon_strl.h"
+
+#include <windows.h>
 #include <fileapi.h>
 #include <io.h>
-#include <windows.h>
 #include <winnt.h>
 
-#include <hamon_error.h>
+#include "../../include/hamon_error.h"
 
 #elif __linux__
 
@@ -23,8 +24,8 @@
 
 #define COLORS
 
-#include <hamon_escape.h>
-#include <hamon_file.h>
+#include "../../include/hamon_escape.h"
+#include "../../include/hamon_file.h"
 
 #ifdef _WIN32
 void *convert_string_to_wide(const char *str) {
@@ -217,7 +218,7 @@ int remove_folder(const char *path) {
       } else {
         LPCWSTR wfull_path = (LPCWSTR)convert_string_to_wide(full_path);
         wprintf(L"Removing file: %s\n", wfull_path);
-        WINBOOL remove_status = RemoveDirectoryW(wfull_path);
+        BOOL remove_status = RemoveDirectoryW(wfull_path);
         if (remove_status == FALSE) {
           win_perror("RemoveDirectory");
           free((void *)wfull_path);

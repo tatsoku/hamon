@@ -10,7 +10,8 @@
 
 #elif _WIN32
 
-#include <bsd/string.h>
+#include <hamon_strl.h>
+// #include "../../include/hamon_strl.h"
 #include <windows.h>
 
 #else
@@ -25,6 +26,15 @@
 #include <hamon_escape.h>
 #include <hamon_exec.h>
 #include <hamon_prompt.h>
+// #include "../../include/hamon_builtins.h"
+// #include "../../include/hamon_env.h"
+// #include "../../include/hamon_exec.h"
+// #include "../../include/hamon_prompt.h"
+// #include "../../include/hamon_escape.h"
+
+
+
+
 
 extern char *env[];
 extern int envc;
@@ -84,24 +94,24 @@ char *get_username(void) {
 // char *assemble_prompt() { return ">"; }
 
 #ifdef _WIN32
-char **get_environment_variables() {
-  LPCH env_strings = GetEnvironmentStrings();
-  LPCH ptr = env_strings;
-  char **env_array = calloc(4096, sizeof(char *));
-  int count = 0;
+// char **get_environment_variables() {
+//   LPCH env_strings = GetEnvironmentStrings();
+//   LPCH ptr = env_strings;
+//   char **env_array = calloc(4096, sizeof(char *));
+//   int count = 0;
 
-  while (*ptr != '\0' && count < 4096 - 1) {
-    size_t len = strlen(ptr);
-    env_array[count] = malloc(len + 1);
-    strlcpy(env_array[count], ptr, strlen(env_array[count]) + 1);
-    ptr += len + 1;
-    count++;
-  }
+//   while (*ptr != '\0' && count < 4096 - 1) {
+//     size_t len = strlen(ptr);
+//     env_array[count] = malloc(len + 1);
+//     strlcpy(env_array[count], ptr, strlen(env_array[count]) + 1);
+//     ptr += len + 1;
+//     count++;
+//   }
 
-  env_array[count] = NULL;
-  FreeEnvironmentStrings(env_strings);
-  return env_array;
-}
+//   env_array[count] = NULL;
+//   FreeEnvironmentStrings(env_strings);
+//   return env_array;
+// }
 #endif
 
 void tokenize(char *input, char **tokens_buffer) {
@@ -157,7 +167,7 @@ int init_prompt(void) {
   init_env();
 
 #ifdef _WIN32
-  free(envp);
+  //free(envp);
 #endif
   for (;;) {
     printf("%s%s ", VERTICAL_CURSOR, prompt);

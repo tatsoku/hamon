@@ -10,13 +10,13 @@
 
 #elif _WIN32
 
-#include <bsd/string.h>
+#include "../../include/hamon_strl.h"
 
 #else
 #error Get a better operating system, loser
 #endif
 
-#include <hamon_escape.h>
+#include "../../include/hamon_escape.h"
 
 char *assemble(char *codes[], int codesc) {
   size_t buffer_size = codesc * 2 + 6;

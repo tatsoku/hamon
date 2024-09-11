@@ -7,3 +7,5 @@
 /vgcore
 /.cache
 /compile_commands.json
+*.obj
+*.exe

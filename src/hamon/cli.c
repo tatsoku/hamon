@@ -10,13 +10,15 @@
 
 #elif _WIN32
 
-#include <bsd/string.h>
 
 #endif
 
 #include <hamon_cli.h>
 #include <hamon_escape.h>
 #include <hamon_meta.h>
+#include <string.h>
+
+
 
 typedef struct {
   char *first;
@@ -84,7 +86,7 @@ int help(Help *help) {
   const int infoc = help->infoc;
   const char **use = help->use;
 
-  SplitPair flag_pairs[infoc];
+  SplitPair* flag_pairs = malloc(infoc);
 
   printf("%s v%s %s %s help\n\n", __NAME__, __PROGRAM_VERSION__, STRIKETHROUGH,
          CLEAR);
@@ -101,6 +103,7 @@ int help(Help *help) {
   printf("Licensed under the %s\n", __LICENSE__);
   printf("Made with %s❤%s by %s\n", RED, CLEAR, __AUTHOR__);
 
+  free(flag_pairs);
   return 0;
 }
 

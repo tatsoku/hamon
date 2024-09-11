@@ -11,7 +11,7 @@
 
 #elif _WIN32
 
-#include <bsd/string.h>
+#include <hamon_strl.h>
 #include <windows.h>
 
 #include <hamon_error.h>
@@ -40,7 +40,7 @@ BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
   LPCSTR path = env_var;
   do {
     size_t len = strlen(path);
-    char temp[len + 1];
+    char* temp = malloc(len + 1);
     strlcpy(temp, path, len);
     if (temp[len - 1] == ';') {
       temp[len - 1] = '\0';
@@ -50,6 +50,7 @@ BOOL find_executable_in_path(LPCSTR executable, LPCSTR *path_found) {
       return TRUE;
     }
     path += len + 1;
+    free(temp);
   } while (*path);
 
   return FALSE;

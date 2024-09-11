@@ -5,11 +5,13 @@
 #ifdef __linux__
 #include <string.h>
 #include <unistd.h>
-#elif WIN32_
-#include <bsd/string.h>
 #endif
 
 #ifdef _WIN32
+
+#include <windows.h>
+#include <hamon_strl.h>
+
 char **get_environment_variables() {
   LPCH env_strings = GetEnvironmentStrings();
   LPCH ptr = env_strings;

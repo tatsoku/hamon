@@ -9,7 +9,6 @@
 
 #elif _WIN32
 
-#include <bsd/string.h>
 #include <windows.h>
 
 #include <hamon_error.h>
@@ -18,7 +17,9 @@
 
 #include <hamon_config.h>
 #include <hamon_escape.h>
+
 #include <hamon_file.h>
+
 
 /*
  * Default configuration:
@@ -165,7 +166,7 @@ int gen_default_config(void) {
     return -1;
   }
 
-  size_t length = strlcpy(config_buffer, default_config, config_buffer_size);
+  size_t length = strcpy_s(config_buffer, config_buffer_size, default_config);
   if (length > config_buffer_size) {
     free(config_buffer);
     return -1;

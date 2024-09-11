@@ -1,24 +1,28 @@
 #include <hamon_builtins.h>
 #include <hamon_env.h>
 
-#include <dirent.h>
-#include <libgen.h>
+
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 
 #ifdef __linux__
-
+// dirent.h is unix only iirc, msvc doesn't know what to do with it
+#include <dirent.h>
+#include <libgen.h>
 #include <string.h>
 #include <unistd.h>
 
 #elif _WIN32
-
-#include <bsd/string.h>
+// replaced with hamon_strl.h
+//#include <bsd/string.h>
 #include <windows.h>
+#include <hamon_strl.h>
 
 #include <hamon_error.h>
+
 
 #else
 #error Get a better operating system, loser.
@@ -246,7 +250,7 @@ int builtin_export(int argc, char *argv[]) {
       return print_builtin_help(Export);
     }
     printf("Writing %s to envp position %d\n", argv[argi], envc);
-    printf("size of env: %lu\n", sizeof(env) / sizeof(env[0]));
+    printf("size of env: %llu\n", sizeof(env) / sizeof(env[0]));
     env[envc] = strndup(argv[argi], strlen(argv[argi]));
     envc++;
   }
