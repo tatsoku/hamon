@@ -24,7 +24,7 @@
 #error Get a better operating system, loser.
 #endif
 
-extern char *env[4096];
+extern char *env[];
 extern int envc;
 
 enum BuiltinType { Echo, Exit, Cd, Pwd, Export, Help };
@@ -141,6 +141,8 @@ int builtin_exit(int argc, char *argv[]) {
     code = atoi(argv[1]);
   }
 
+  deinit_env();
+
   exit(code);
   return code;
 }
@@ -230,11 +232,6 @@ int builtin_pwd(int argc, char *argv[]) {
 }
 
 int builtin_export(int argc, char *argv[]) {
-  int envc = 0;
-
-  while (env[envc] != 0)
-    envc++;
-
   printf("env len: %d\n", envc);
 
   if (argc < 2) {
@@ -248,11 +245,12 @@ int builtin_export(int argc, char *argv[]) {
     if (!is_env_format(argv[argi])) {
       return print_builtin_help(Export);
     }
-    printf("Writing %s to envp position %d\n", argv[argi], envc++);
-    env[envc] = (char *)argv[argi];
+    printf("Writing %s to envp position %d\n", argv[argi], envc);
+    printf("size of env: %lu\n", sizeof(env) / sizeof(env[0]));
+    env[envc] = strndup(argv[argi], strlen(argv[argi]));
+    envc++;
   }
 
-  printf("envp[%d]: %s\n", envc, env[envc]);
   env[envc] = 0;
 
   return 0;
@@ -264,7 +262,7 @@ int builtin_test(int argc, char *argv[]) {
   }
 
   for (int envi = 0; envi != envc; envi++) {
-    if (strncmp(env[envi], "PATH", 4) == 0) {
+    if (strncmp(env[envi], argv[1], 4) == 0) {
       puts(env[envi]);
     }
   }
@@ -294,6 +292,8 @@ int check_builtins(int argc, char *argv[]) {
       &builtin_cd,   &builtin_pwd,  &builtin_export, &builtin_help,
       &builtin_echo, &builtin_exit, &builtin_test};
   int num_builtins = sizeof(builtin_strs) / sizeof(char *);
+
+  printf("checking builtins\n");
 
   for (int builtin_index = 0; builtin_index < num_builtins; builtin_index++) {
     if (strncmp(builtin_strs[builtin_index], argv[0], 4) == 0) {

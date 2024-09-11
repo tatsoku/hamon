@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifdef __linux__
 #include <string.h>
@@ -49,4 +51,24 @@ void init_env() {
 #ifdef _WIN32
   free(envp);
 #endif
+}
+
+void deinit_env() {
+#ifdef __linux__
+  char **envp = __environ;
+  int environ_len = 0;
+  while (envp[environ_len] != 0)
+    environ_len++;
+  for (int envi = 0; envi != envc - environ_len; envi++) {
+    printf("Freeing: %s\n", env[envi + environ_len]);
+    free(env[envi + environ_len]);
+    memset(env, 0, sizeof(env));
+  }
+#elif _WIN32
+  for (int envi = 0; envi != envc; envi++) {
+    free(env[envi]);
+    memset(env, 0, sizeof(env));
+  }
+#endif
+  envc = 0;
 }

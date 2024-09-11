@@ -195,7 +195,7 @@ link() {
 	local RELINK
 	local -a OBJECTS
 	local EXECUTABLE_NAME
-	local -a TRIMMED_FILES
+	local -a TRIMMED_OBJ_FILES
 
 	if [[ ! -d ${BIN} ]]; then
 		mkdir "${BIN}"
@@ -210,25 +210,24 @@ link() {
 
 	mapfile -t OBJECTS < <(find "${OUT}" -type f -name "*.o")
 
-	TRIMMED_FILES=("${OBJECTS[@]##*/}")
+	TRIMMED_OBJ_FILES=("${OBJECTS[@]##*/}")
 	pushd "${OUT}" >/dev/null || handle_failure "Failed to pushd" #|| echo "Failed to pushd" && exit 1
 
-	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_FILES[*]}${CLEAR}"
-	for i in "${!TRIMMED_FILES[@]}"; do TRIMMED_FILES[i]="${OUT}/${TRIMMED_FILES[i]}"; done
+	echo -e "${BLUE}>${CLEAR} Linking: ${CYAN}${TRIMMED_OBJ_FILES[*]}${CLEAR}"
 	if [[ -f "${BIN}/${EXECUTABLE_NAME}" ]]; then
 		echo -ne "${YELLOW}!${CLEAR} ${CYAN}${EXECUTABLE_NAME}${CLEAR} seems to already exist, you wanna relink it? [${GREEN}Y${CLEAR}/${RED}n${CLEAR}]: "
 		read -r RELINK
 		if [[ ! ${RELINK} =~ [Nn] ]]; then
-			echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_FILES[*]}"
+			echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_OBJ_FILES[*]}"
 			# shellcheck disable=SC2086,SC2048
-			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
-			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
+			"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_OBJ_FILES[*]}
+			echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_OBJ_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
 		fi
 	else
-		echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_FILES[*]}"
+		echo -e "Running: ${CC} ${LINKER_FLAGS} ${CFLAGS} -o ${BIN}/${EXECUTABLE_NAME} ${TRIMMED_OBJ_FILES[*]}"
 		# shellcheck disable=SC2086,SC2048
-		"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_FILES[*]}
-		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
+		"${CC}" ${LINKER_FLAGS} ${CFLAGS} -o "${BIN}/${EXECUTABLE_NAME}" ${TRIMMED_OBJ_FILES[*]}
+		echo -e "${GREEN}✓${CLEAR} Linked ${CYAN}${TRIMMED_OBJ_FILES[*]}${CLEAR} to ${GREEN}${EXECUTABLE_NAME}${CLEAR} successfully"
 	fi
 
 	popd >/dev/null || handle_failure "Failed to popd" # || echo "Failed to popd" && exit 1

@@ -18,6 +18,7 @@
 #endif
 
 #define CURSORS
+#define COLORS
 
 #include <hamon_builtins.h>
 #include <hamon_env.h>
@@ -25,7 +26,7 @@
 #include <hamon_exec.h>
 #include <hamon_prompt.h>
 
-extern char *env[4096];
+extern char *env[];
 extern int envc;
 
 char *get_hostname() {
@@ -140,6 +141,10 @@ void tokenize(char *input, char **tokens_buffer) {
   tokens_buffer[token_index] = 0;
 }
 
+void recalc_argv(char *argv[], int passed_envc) {
+  memmove(argv, argv + passed_envc, sizeof(char *) * (4096 - passed_envc));
+}
+
 int init_prompt(void) {
   char *prompt = "hsh >";
   char input_buf[4096] = {0};
@@ -147,6 +152,7 @@ int init_prompt(void) {
   char executable[128] = {0};
 
   int argc = 0;
+  int passed_envc = 0;
 
   init_env();
 
@@ -172,18 +178,38 @@ int init_prompt(void) {
     for (int argi = 0; argi != argc; argi++) {
       if (is_env_format(argv[argi])) {
         printf("User specified env variable: %s\n", argv[argi]);
-        env[envc++] = argv[argi];
+        env[envc] = strndup(argv[argi], strlen(argv[argi]));
+        envc++;
+        passed_envc++;
       } else {
         strlcpy(executable, argv[argi], 128);
         break;
       }
     }
 
-    if (check_builtins(argc, argv) == -1) {
-      if (execute(executable, argv) == -1)
-        continue;
+    if (passed_envc != 0) {
+      recalc_argv(argv, passed_envc);
+      passed_envc = 0;
     }
 
+    argc = 0;
+    while (argv[argc] != 0)
+      argc++;
+
+    printf("passed_envc, argc, argv[0]: %d, %d, %s\n", passed_envc, argc,
+           argv[0]);
+
+    if (argv[0] == 0) {
+      fprintf(stderr, RED "!%s No command provided!\n", CLEAR);
+      continue;
+    }
+
+    if (check_builtins(argc, argv) == -1) {
+      if (execute(executable, argv) == -1) {
+        argc = 0;
+        continue;
+      }
+    }
     argc = 0;
   }
 }

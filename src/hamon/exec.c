@@ -26,7 +26,7 @@
 #include <hamon_escape.h>
 #include <hamon_exec.h>
 
-extern char *env[4096];
+extern char *env[];
 extern int envc;
 
 #if _WIN32
