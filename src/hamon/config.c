@@ -12,6 +12,8 @@
 #include <windows.h>
 
 #include <hamon_error.h>
+#include <hamon_strl.h>
+
 
 #endif
 
@@ -166,7 +168,7 @@ int gen_default_config(void) {
     return -1;
   }
 
-  size_t length = strcpy_s(config_buffer, config_buffer_size, default_config);
+  size_t length = strlcpy(config_buffer, config_buffer_size, default_config);
   if (length > config_buffer_size) {
     free(config_buffer);
     return -1;

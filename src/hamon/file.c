@@ -3,14 +3,14 @@
 
 #ifdef _WIN32
 
-#include "../../include/hamon_strl.h"
+#include <hamon_strl.h>
 
 #include <windows.h>
 #include <fileapi.h>
 #include <io.h>
 #include <winnt.h>
 
-#include "../../include/hamon_error.h"
+#include <hamon_error.h>
 
 #elif __linux__
 
@@ -24,8 +24,8 @@
 
 #define COLORS
 
-#include "../../include/hamon_escape.h"
-#include "../../include/hamon_file.h"
+#include <hamon_escape.h>
+#include <hamon_file.h>
 
 #ifdef _WIN32
 void *convert_string_to_wide(const char *str) {
