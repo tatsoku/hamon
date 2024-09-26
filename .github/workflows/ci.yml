@@ -13,7 +13,7 @@ jobs:
           - {sys: clang64, env: clang-x86_64}
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
       - name: Install mold on ubuntu systems
         if: matrix.os == 'ubuntu-24.04'
         uses: rui314/setup-mold@2e332a0b602c2fc65d2d3995941b1b29a5f554a0 # v1
