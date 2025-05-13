@@ -89,7 +89,7 @@ jobs:
         run: |
           echo "export PKG_CONFIG_PATH=/usr/lib/pkgconfig:/usr/share/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
       - name: Enable Mold.
-        uses: rui314/setup-mold@f80524ca6eeaa76759b57fb78ddce5d87a20c720 # v1
+        uses: rui314/setup-mold@67424c1b3680e35255d95971cbd5de0047bf31c3 # v1
       - name: Install just on ubuntu
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v2
       - name: Install dependencies.
